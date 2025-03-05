@@ -395,7 +395,6 @@ const ElectricForestLineup = () => {
 
     return (
         <div className="p-3 sm:p-4 md:p-6 w-full max-w-[95%] sm:max-w-[90%] md:max-w-4xl mx-auto rounded-lg my-4 md:my-8" style={{
-            backgroundImage: "linear-gradient(to bottom, rgba(10,30,15,0.9), rgba(5,15,20,0.92)), url('/src/assets/electricForestLineup.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             backgroundRepeat: "no-repeat",
