@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FilterPanel } from './lineup/FilterPanel';
 import { ArtistTable } from './lineup/ArtistTable';
 import { ColumnSelector } from './lineup/ColumnSelector';
@@ -8,10 +8,10 @@ import { LineupHeader } from './lineup/LineupHeader';
 import { LineupStats } from './lineup/LineupStats';
 import { TextExport } from './lineup/TextExport';
 import {  ColumnPreferences } from '../types/lineup-types';
-import { artists as allArtists } from '../data/artists';
+import { artists as allArtists } from '../data/artists.tsx';
 
 const ElectricForestLineup = () => {
-    const copyRef = useRef(null);
+    const copyRef = useRef<HTMLTextAreaElement>(null);
 
     // Add state for selected artists and column preferences
     const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>({});
@@ -368,7 +368,7 @@ const ElectricForestLineup = () => {
                     />
                 )}
 
-                <style jsx>{`
+                <style>{`
                   @keyframes shimmer {
                     0% {
                       transform: translateY(-100%) translateX(-100%) rotate(-45deg);

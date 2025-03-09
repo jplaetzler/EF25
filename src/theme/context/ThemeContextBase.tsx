@@ -8,7 +8,7 @@ export interface ThemeContextType {
   setIconSize: (size: IconSize) => void;
   themeMode: ThemeMode;
   setThemeMode: (mode: ThemeMode) => void;
-  getIconClasses: (name: string) => string;
+  getIconClasses: () => string;
   getButtonClasses: (variant?: 'primary' | 'secondary' | 'ghost') => string;
 }
 

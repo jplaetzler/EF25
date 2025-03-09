@@ -80,8 +80,7 @@ interface IconProps {
 }
 
 export const Icon: React.FC<IconProps> = ({ name, className = '', onClick }) => {
-  const { getIconClasses, iconSize } = useTheme();
-  const iconClass = getIconClasses();
+  const {iconSize } = useTheme();
   
   // Fixed sizes that override the theme sizes when icons are too large
   const fixedSizes = {

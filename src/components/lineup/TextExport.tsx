@@ -2,7 +2,7 @@ import React from 'react';
 import { ArtistData, ColumnPreferences } from '../../types/lineup-types';
 
 interface TextExportProps {
-    copyRef: React.RefObject<HTMLTextAreaElement>;
+    copyRef: React.RefObject<HTMLTextAreaElement | null>;
     selectedArtists: Record<string, boolean>;
     sortedArtists: ArtistData[];
     columnPreferences: ColumnPreferences;

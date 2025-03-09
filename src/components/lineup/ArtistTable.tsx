@@ -272,7 +272,7 @@ export const ArtistTable: React.FC<ArtistTableProps> = ({
                                                 </a>
                                             ) : musicService === "youtube" && artist.youtubeId ? (
                                                 <a
-                                                    href={`https://www.youtube.com/channel/${artist.youtubeId}`}
+                                                    href={`https://music.youtube.com/channel/${artist.youtubeId}`}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
                                                     className="px-3 py-1.5 md:px-4 md:py-2 bg-gradient-to-r from-red-800/50 to-red-900/50 text-red-300 rounded-full text-xs md:text-sm font-medium inline-flex items-center border border-red-500/20 hover:bg-red-800/70 transition-all"
