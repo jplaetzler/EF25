@@ -1,4 +1,7 @@
 import React from 'react';
+import { useTheme } from '../../theme/hooks/useTheme';
+import Icon from '../../theme/components/Icon';
+import Shimmer from '../../theme/components/Shimmer';
 
 interface FilterPanelProps {
     filter: string;
@@ -23,6 +26,9 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
     musicService,
     setMusicService
 }) => {
+    // Using ThemeProvider but not currently accessing specific theme properties in this component
+    useTheme();
+    
     return (
         <div className="relative mb-8">
             {/* Forest-inspired background effect */}
@@ -33,16 +39,14 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                      mixBlendMode: "overlay"
                  }}></div>
                  
-            <div className="bg-gradient-to-r from-green-900/30 via-blue-900/20 to-purple-900/30 p-5 rounded-lg border border-green-500/20 backdrop-blur-sm"
+            <Shimmer className="bg-gradient-to-r from-green-900/30 via-blue-900/20 to-purple-900/30 p-5 rounded-lg border border-forest-light/20 backdrop-blur-sm"
                  style={{boxShadow: "0 0 15px rgba(0, 255, 128, 0.15), inset 0 0 20px rgba(0, 0, 0, 0.2)"}}>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="relative">
-                        <label className="block text-xs md:text-sm font-semibold mb-1 md:mb-2 text-green-300 flex items-center" 
+                        <label className="block text-xs md:text-sm font-semibold mb-1 md:mb-2 text-forest-light flex items-center" 
                             style={{textShadow: "0 0 5px rgba(0, 255, 128, 0.7)"}}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd" />
-                            </svg>
+                            <Icon name="filter" className="mr-1 md:mr-2 text-forest-light w-3 h-3 md:w-4 md:h-4" />
                             Search Artist
                         </label>
                         <input
@@ -50,22 +54,20 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
                             placeholder="Find your favorite artists..."
-                            className="w-full p-2 md:p-3 text-sm bg-black/60 border border-green-400/50 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500/80 text-white placeholder-gray-400 transition-all"
+                            className="w-full p-2 md:p-3 text-sm bg-black/60 border border-forest-light/50 rounded-md focus:outline-none focus:ring-2 focus:ring-forest-light/80 text-white placeholder-gray-400 transition-all"
                             style={{
                                 boxShadow: "0 0 8px rgba(0, 255, 128, 0.2)",
                                 backdropFilter: "blur(4px)"
                             }}
                         />
                         {/* Electric glow effect */}
-                        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-green-400/50 to-transparent"></div>
+                        <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-forest-light/50 to-transparent"></div>
                     </div>
 
                     <div className="relative">
                         <label className="block text-xs md:text-sm font-semibold mb-1 md:mb-2 text-purple-300 flex items-center" 
                             style={{textShadow: "0 0 5px rgba(128, 0, 255, 0.7)"}}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                            </svg>
+                            <Icon name="sort" className="mr-1 md:mr-2 text-purple-300 w-3 h-3 md:w-4 md:h-4" />
                             Artist Category
                         </label>
                         <select
@@ -89,9 +91,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                     <div className="relative sm:col-span-2 lg:col-span-1">
                         <label className="block text-xs md:text-sm font-semibold mb-1 md:mb-2 text-blue-300 flex items-center" 
                             style={{textShadow: "0 0 5px rgba(0, 128, 255, 0.7)"}}>
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
-                            </svg>
+                            <Icon name="calendar" className="mr-1 md:mr-2 text-blue-300 w-3 h-3 md:w-4 md:h-4" />
                             Performance Day
                         </label>
                         <select
@@ -115,9 +115,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                 <div className="mt-4 pt-3 border-t border-cyan-500/20">
                     <label className="block text-xs md:text-sm font-semibold mb-2 text-yellow-300 flex items-center" 
                         style={{textShadow: "0 0 5px rgba(255, 200, 0, 0.7)"}}>
-                        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 md:h-4 md:w-4 mr-1 md:mr-2" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 .895-3 2s1.343 2 3 2 3-.895 3-2V3z" />
-                        </svg>
+                        <Icon name="headphones" className="mr-1 md:mr-2 text-yellow-300 w-3 h-3 md:w-4 md:h-4" />
                         Music Service Links
                     </label>
                     <div className="flex items-center gap-3 md:gap-5 flex-wrap">
@@ -173,7 +171,7 @@ export const FilterPanel: React.FC<FilterPanelProps> = ({
                         </label>
                     </div>
                 </div>
-            </div>
+            </Shimmer>
         </div>
     );
 };

@@ -445,7 +445,7 @@ const ElectricForestLineup = () => {
                 />
 
                 <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400"
+                    <h3 className="text-xl font-bold mb-4 bg-clip-text bg-gradient-to-r from-green-400 to-blue-400"
                         style={{textShadow: "0 0 5px rgba(0, 255, 170, 0.5)"}}>
                         Export Your Custom Lineup
                     </h3>

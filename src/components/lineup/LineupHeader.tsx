@@ -12,14 +12,14 @@ export const LineupHeader: React.FC = () => {
                  }}></div>
 
             <div className="relative z-10">
-                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-blue-400 to-purple-500 tracking-wider" 
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-1 bg-clip-text bg-gradient-to-r from-green-400 via-blue-400 to-purple-500 tracking-wider"
                     style={{
                         textShadow: "0 0 10px rgba(0, 255, 170, 0.7), 0 0 20px rgba(128, 0, 255, 0.5)",
                         letterSpacing: "0.05em"
                     }}>
                     ELECTRIC FOREST
                 </h1>
-                <div className="text-xl md:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-green-300 mb-2"
+                <div className="text-xl md:text-2xl font-bold bg-clip-text bg-gradient-to-r from-cyan-400 to-green-300 mb-2"
                      style={{textShadow: "0 0 8px rgba(0, 255, 170, 0.5)"}}>
                     2025
                 </div>
