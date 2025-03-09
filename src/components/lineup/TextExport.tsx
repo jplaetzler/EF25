@@ -21,7 +21,7 @@ export const TextExport: React.FC<TextExportProps> = ({
             : sortedArtists;
 
         return artistsToShow.map(artist => {
-            let parts = [];
+            const parts = [];
             if (columnPreferences.name) parts.push(artist.name);
             if (columnPreferences.category) parts.push(artist.category);
             if (columnPreferences.day && artist.day) parts.push(artist.day);

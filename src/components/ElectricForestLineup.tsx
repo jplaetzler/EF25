@@ -1,28 +1,27 @@
 import { useState, useRef, useEffect } from 'react';
-import { FilterPanel } from './lineup/FilterPanel';
 import { ArtistTable } from './lineup/ArtistTable';
-import { ColumnSelector } from './lineup/ColumnSelector';
-import { ActionButtons } from './lineup/ActionButtons';
 import { PlaylistModal } from './lineup/PlaylistModal';
-import { LineupHeader } from './lineup/LineupHeader';
-import { LineupStats } from './lineup/LineupStats';
 import { TextExport } from './lineup/TextExport';
-import {  ColumnPreferences } from '../types/lineup-types';
+import { ColumnPreferences } from '../types/lineup-types';
 import { artists as allArtists } from '../data/artists.tsx';
+import { useTheme } from '../theme/hooks/useTheme';
+import Shimmer from '../theme/components/Shimmer';
+import { LineupHeader } from './lineup/LineupHeader';
 
 const ElectricForestLineup = () => {
     const copyRef = useRef<HTMLTextAreaElement>(null);
+    const { getButtonClasses } = useTheme();
 
     // Add state for selected artists and column preferences
     const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>({});
-    const [columnPreferences, setColumnPreferences] = useState<ColumnPreferences>({
+    const [columnPreferences] = useState<ColumnPreferences>({
         name: true,
         category: true,
         day: true
     });
 
     // New state for music service preference
-    const [musicService, setMusicService] = useState<string>("spotify");
+    const [musicService] = useState<string>("spotify");
 
     // State for filtering and sorting
     const [filter, setFilter] = useState("");
@@ -78,6 +77,8 @@ const ElectricForestLineup = () => {
     // Get unique days for filtering
     const days = ["All", ...Array.from(new Set(allArtists.map(artist => artist.day).filter(day => day !== "")))];
 
+    // Note: Removed stats calculation as we're not using this functionality
+
     // Function to copy filtered artists to clipboard
     const copyToClipboard = () => {
         // Get selected artists or use filtered list if none selected
@@ -87,7 +88,7 @@ const ElectricForestLineup = () => {
 
         // Format the text based on column preferences
         const textToCopy = artistsToCopy.map(artist => {
-            let parts = [];
+            const parts = [];
             if (columnPreferences.name) parts.push(artist.name);
             if (columnPreferences.category) parts.push(artist.category);
             if (columnPreferences.day && artist.day) parts.push(artist.day);
@@ -113,52 +114,7 @@ const ElectricForestLineup = () => {
         document.body.removeChild(textarea);
     };
 
-    // Function to create a text file for download
-    const downloadAsCsv = () => {
-        // Get selected artists or use filtered list if none selected
-        const artistsToDownload = Object.keys(selectedArtists).length > 0
-            ? sortedArtists.filter(artist => selectedArtists[artist.name])
-            : sortedArtists;
-
-        // Create headers based on column preferences
-        let headers = [];
-        if (columnPreferences.name) headers.push("Artist Name");
-        if (columnPreferences.category) headers.push("Category");
-        if (columnPreferences.day) headers.push("Day");
-
-        // Add music service ID columns
-        if (musicService === "spotify") headers.push("Spotify ID");
-        if (musicService === "youtube") headers.push("YouTube ID");
-
-        let csvContent = headers.join(',') + "\n";
-
-        // Add data rows
-        csvContent += artistsToDownload.map(artist => {
-            let parts = [];
-            if (columnPreferences.name) parts.push(`"${artist.name}"`);
-            if (columnPreferences.category) parts.push(`"${artist.category}"`);
-            if (columnPreferences.day) parts.push(`"${artist.day}"`);
-
-            // Add music service IDs
-            if (musicService === "spotify") parts.push(`"${artist.spotifyId || ''}"`);
-            if (musicService === "youtube") parts.push(`"${artist.youtubeId || ''}"`);
-
-            return parts.join(',');
-        }).join('\n');
-
-        // Create a Blob with the CSV content
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const url = URL.createObjectURL(blob);
-
-        // Create a link element to trigger the download
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', 'electric_forest_2025_lineup.csv');
-        link.style.visibility = 'hidden';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    };
+    // Note: removed downloadAsCsv function as it's not used in this version
 
     // Toggle selection of an artist
     const toggleArtistSelection = (artistName: string) => {
@@ -185,58 +141,12 @@ const ElectricForestLineup = () => {
         }
     };
 
-    // Toggle column preference
-    const toggleColumnPreference = (column: keyof ColumnPreferences) => {
-        setColumnPreferences(prev => ({
-            ...prev,
-            [column]: !prev[column]
-        }));
-    };
+    // Note: removed toggleColumnPreference function as it's not used in this version
 
     // Count selected artists
     const selectedCount = Object.values(selectedArtists).filter(Boolean).length;
-
-    // Function to open selected artists in Spotify or YouTube
-    const openSelectedArtists = () => {
-        const selectedArtistsList = sortedArtists.filter(artist => selectedArtists[artist.name]);
-
-        if (selectedArtistsList.length === 0) {
-            alert("Please select at least one artist.");
-            return;
-        }
-
-        // Limit to max 10 windows to avoid browser blocking
-        const maxToOpen = 8;
-        let openCount = 0;
-
-        if (selectedArtistsList.length > maxToOpen) {
-            if (!confirm(`You're about to open ${selectedArtistsList.length} tabs. This may be blocked by your browser. Continue with the first ${maxToOpen}?`)) {
-                return;
-            }
-        }
-
-        selectedArtistsList.forEach(artist => {
-            if (openCount >= maxToOpen) return;
-
-            const id = musicService === "spotify" ? artist.spotifyId : artist.youtubeId;
-            if (!id) {
-                console.log(`No ${musicService} ID for ${artist.name}`);
-                return;
-            }
-
-            const url = musicService === "spotify"
-                ? `https://open.spotify.com/artist/${id}`
-                : `https://www.youtube.com/channel/${id}`;
-
-            window.open(url, '_blank');
-            openCount++;
-        });
-
-        // Update UI if we stopped early
-        if (selectedArtistsList.length > maxToOpen) {
-            alert(`Opened ${maxToOpen} of ${selectedArtistsList.length} selected artists. Browsers limit how many tabs can be opened at once.`);
-        }
-    };
+    
+    // Note: removed openSelectedArtists function as it's not used in this version
 
     // Function to create a playlist (simulation)
     const createPlaylist = () => {
@@ -268,7 +178,7 @@ const ElectricForestLineup = () => {
                 : sortedArtists;
 
             (copyRef.current as HTMLTextAreaElement).value = artistsToShow.map(artist => {
-                let parts = [];
+                const parts = [];
                 if (columnPreferences.name) parts.push(artist.name);
                 if (columnPreferences.category) parts.push(artist.category);
                 if (columnPreferences.day && artist.day) parts.push(artist.day);
@@ -278,110 +188,192 @@ const ElectricForestLineup = () => {
     }, [selectedArtists, sortedArtists, columnPreferences]);
 
     return (
-        <div className="p-3 sm:p-4 md:p-6 w-full max-w-[95%] sm:max-w-[90%] md:max-w-4xl mx-auto rounded-lg my-4 md:my-8" style={{
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-            boxShadow: "0 0 20px rgba(0, 255, 170, 0.5), 0 0 40px rgba(128, 0, 255, 0.3), inset 0 0 30px rgba(0, 255, 128, 0.05)",
-            border: "1px solid rgba(128, 255, 212, 0.5)",
-            backdropFilter: "blur(10px)",
-            position: "relative",
-            overflow: "hidden"
-        }}>
-            {/* Electric glow border effect */}
-            <div className="absolute inset-0 pointer-events-none" style={{
-                background: "linear-gradient(45deg, transparent 98%, rgba(0, 255, 170, 0.8) 100%), linear-gradient(135deg, transparent 98%, rgba(128, 0, 255, 0.8) 100%)",
-                opacity: "0.5",
-                animation: "pulse 3s infinite ease-in-out"
-            }}></div>
-            <div className="mb-8">
+        <div className="min-h-screen bg-black text-white font-sans overflow-hidden">
+            {/* Forest-inspired animated background */}
+            <div className="fixed inset-0 z-0 opacity-20">
+                <div className="absolute h-full w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-900 via-transparent to-transparent"></div>
+                <div className="absolute h-full w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900 via-transparent to-transparent opacity-50" style={{top: '30%', left: '70%'}}></div>
+                <div className="absolute h-full w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900 via-transparent to-transparent opacity-50" style={{top: '70%', left: '20%'}}></div>
+                
+                {/* Animated circles for firefly effect */}
+                {[...Array(20)].map((_, i) => (
+                    <div 
+                        key={i}
+                        className="absolute rounded-full bg-white"
+                        style={{
+                            width: `${Math.random() * 4 + 1}px`,
+                            height: `${Math.random() * 4 + 1}px`,
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                            opacity: 0.6,
+                            boxShadow: '0 0 10px 2px rgba(255, 255, 255, 0.3)',
+                            animation: `pulse ${Math.random() * 3 + 2}s infinite alternate ease-in-out ${Math.random() * 2}s`
+                        }}
+                    ></div>
+                ))}
+            </div>
+
+            <div className="relative z-10 container mx-auto px-4 py-8">
+                {/* Header with logo */}
                 <LineupHeader />
 
-                <FilterPanel 
-                    filter={filter} 
-                    setFilter={setFilter}
-                    category={category}
-                    setCategory={setCategory}
-                    day={day}
-                    setDay={setDay}
-                    days={days}
-                    musicService={musicService}
-                    setMusicService={setMusicService}
-                />
-            </div>
+                {/* Main content */}
+                <div className="max-w-7xl mx-auto">
+                    {/* Filters section */}
+                    <Shimmer className="mb-8 bg-gradient-to-r from-black/80 to-black/40 backdrop-blur-md p-6 rounded-xl border border-green-500/20 shadow-[0_0_15px_rgba(0,255,128,0.2)]">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            {/* Search filter */}
+                            <div>
+                                <label className="block text-green-400 mb-2 font-medium">
+                                    Search Artists
+                                </label>
+                                <input 
+                                    type="text" 
+                                    value={filter}
+                                    onChange={(e) => setFilter(e.target.value)}
+                                    placeholder="Type artist name..." 
+                                    className="w-full px-4 py-2 bg-black/60 border border-green-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                                />
+                            </div>
+                            
+                            {/* Day filter */}
+                            <div>
+                                <label className="block text-purple-400 mb-2 font-medium">
+                                    Filter by Day
+                                </label>
+                                <select 
+                                    value={day}
+                                    onChange={(e) => setDay(e.target.value)}
+                                    className="w-full px-4 py-2 bg-black/60 border border-purple-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                >
+                                    {days.map(day => (
+                                        <option key={day} value={day}>{day}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            
+                            {/* Category filter */}
+                            <div>
+                                <label className="block text-blue-400 mb-2 font-medium">
+                                    Filter by Category
+                                </label>
+                                <select 
+                                    value={category}
+                                    onChange={(e) => setCategory(e.target.value)}
+                                    className="w-full px-4 py-2 bg-black/60 border border-blue-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                >
+                                    <option value="All">All</option>
+                                    <option value="Headliner">Headliner</option>
+                                    <option value="Featured Artists">Featured Artists</option>
+                                    <option value="Supporting Artists">Supporting Artists</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                    </Shimmer>
+                    
+                    {/* Artist listing */}
+                    <Shimmer className="bg-gradient-to-r from-black/80 to-black/40 backdrop-blur-md p-6 rounded-xl border border-purple-500/20 shadow-[0_0_15px_rgba(128,0,255,0.2)]">
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-bold text-purple-400">
+                                Artists {filteredArtists.length > 0 && `(${filteredArtists.length})`}
+                            </h2>
+                            
+                            <div className="text-sm text-gray-400">
+                                Selected: {Object.values(selectedArtists).filter(Boolean).length}
+                            </div>
+                        </div>
+                        
+                        <ArtistTable 
+                            sortedArtists={sortedArtists}
+                            selectedArtists={selectedArtists}
+                            toggleArtistSelection={toggleArtistSelection}
+                            toggleAllArtists={toggleAllArtists}
+                            handleSort={handleSort}
+                            sortBy={sortBy}
+                            sortDirection={sortDirection}
+                            musicService={musicService}
+                        />
+                    </Shimmer>
+                    
+                    {/* Action buttons */}
+                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <Shimmer className="overflow-hidden">
+                            <button 
+                                onClick={copyToClipboard}
+                                className={`${getButtonClasses('primary')} w-full relative overflow-hidden group`}
+                                style={{boxShadow: '0 0 15px rgba(0, 255, 128, 0.3)'}}
+                            >
+                                <div className="absolute inset-0 w-full h-full">
+                                    <div className="absolute w-8 h-32 bg-white/20 -rotate-45 top-0 -left-32 transform group-hover:translate-x-96 transition-transform duration-1000"></div>
+                                </div>
+                                <span className="relative">
+                                    Export Selected Artists
+                                </span>
+                            </button>
+                        </Shimmer>
+                        
+                        <Shimmer className="overflow-hidden">
+                            <button 
+                                onClick={() => setShowPlaylistModal(true)}
+                                className={`${getButtonClasses('secondary')} w-full relative overflow-hidden group`}
+                                style={{boxShadow: '0 0 15px rgba(128, 0, 255, 0.3)'}}
+                            >
+                                <div className="absolute inset-0 w-full h-full">
+                                    <div className="absolute w-8 h-32 bg-white/20 -rotate-45 top-0 -left-32 transform group-hover:translate-x-96 transition-transform duration-1000"></div>
+                                </div>
+                                <span className="relative">
+                                    Create {musicService === "spotify" ? "Spotify" : "YouTube"} Playlist
+                                </span>
+                            </button>
+                        </Shimmer>
+                    </div>
 
-            <ArtistTable 
-                sortedArtists={sortedArtists}
-                selectedArtists={selectedArtists}
-                toggleArtistSelection={toggleArtistSelection}
-                toggleAllArtists={toggleAllArtists}
-                handleSort={handleSort}
-                sortBy={sortBy}
-                sortDirection={sortDirection}
-                musicService={musicService}
-            />
-
-            <div className="mt-8">
-                <LineupStats 
-                    sortedArtists={sortedArtists}
-                    allArtists={allArtists}
-                    selectedCount={selectedCount}
-                />
-
-                <div className="mb-8">
-                    <h3 className="text-xl font-bold mb-4 bg-clip-text bg-gradient-to-r from-green-400 to-blue-400"
-                        style={{textShadow: "0 0 5px rgba(0, 255, 170, 0.5)"}}>
-                        Export Your Custom Lineup
-                    </h3>
-
-                    <ColumnSelector 
+                    <TextExport 
+                        copyRef={copyRef}
+                        selectedArtists={selectedArtists}
+                        sortedArtists={sortedArtists}
                         columnPreferences={columnPreferences}
-                        toggleColumnPreference={toggleColumnPreference}
                     />
 
-                    <ActionButtons 
-                        selectedCount={selectedCount}
-                        copyToClipboard={copyToClipboard}
-                        downloadAsCsv={downloadAsCsv}
-                        openSelectedArtists={openSelectedArtists}
-                        setShowPlaylistModal={setShowPlaylistModal}
-                        musicService={musicService}
-                    />
+                    {showPlaylistModal && (
+                        <PlaylistModal 
+                            isCreatingPlaylist={isCreatingPlaylist}
+                            setShowPlaylistModal={setShowPlaylistModal}
+                            playlistName={playlistName}
+                            setPlaylistName={setPlaylistName}
+                            selectedCount={selectedCount}
+                            createPlaylist={createPlaylist}
+                            musicService={musicService}
+                        />
+                    )}
                 </div>
-
-                <TextExport 
-                    copyRef={copyRef}
-                    selectedArtists={selectedArtists}
-                    sortedArtists={sortedArtists}
-                    columnPreferences={columnPreferences}
-                />
-
-                {showPlaylistModal && (
-                    <PlaylistModal 
-                        isCreatingPlaylist={isCreatingPlaylist}
-                        setShowPlaylistModal={setShowPlaylistModal}
-                        playlistName={playlistName}
-                        setPlaylistName={setPlaylistName}
-                        selectedCount={selectedCount}
-                        createPlaylist={createPlaylist}
-                        musicService={musicService}
-                    />
-                )}
-
-                <style>{`
-                  @keyframes shimmer {
+            </div>
+            
+            {/* Footer */}
+            <footer className="relative z-10 text-center py-8 mt-12 text-gray-400 text-sm">
+                <p>Electric Forest 2025 • Rothbury, MI • June 19-22, 2025</p>
+            </footer>
+            
+            <style>{`
+                @keyframes pulse {
+                    0% { opacity: 0.3; }
+                    50% { opacity: 0.7; }
+                    100% { opacity: 0.3; }
+                }
+                
+                @keyframes shimmer {
                     0% {
-                      transform: translateY(-100%) translateX(-100%) rotate(-45deg);
+                        transform: translateY(-100%) translateX(-100%) rotate(-45deg);
                     }
                     50% {
-                      transform: translateY(100%) translateX(100%) rotate(-45deg);
+                        transform: translateY(100%) translateX(100%) rotate(-45deg);
                     }
                     100% {
-                      transform: translateY(100%) translateX(100%) rotate(-45deg);
+                        transform: translateY(100%) translateX(100%) rotate(-45deg);
                     }
-                  }
-                `}</style>
-            </div>
+                }
+            `}</style>
         </div>
     );
 };
