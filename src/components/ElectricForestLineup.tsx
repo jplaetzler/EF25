@@ -220,47 +220,54 @@ const ElectricForestLineup = () => {
                 {/* Main content */}
                 <div className="max-w-7xl mx-auto">
                     {/* Filters section */}
-                    <Shimmer className="mb-8 bg-gradient-to-r from-black/80 to-black/40 backdrop-blur-md p-6 rounded-xl border border-green-500/20 shadow-[0_0_15px_rgba(0,255,128,0.2)]">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            {/* Search filter */}
+                    <div className="bg-black/30 border border-green-500/20 rounded-lg p-6 mb-8"
+                         style={{boxShadow: "0 0 15px rgba(0, 255, 128, 0.15)"}}>
+                        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
+                            {/* Search Artists */}
                             <div>
-                                <label className="block text-green-400 mb-2 font-medium">
+                                <label className="block text-green-400 mb-2"
+                                       style={{textShadow: "0 0 5px rgba(0, 255, 128, 0.4)"}}>
                                     Search Artists
                                 </label>
-                                <input 
-                                    type="text" 
+                                <input
+                                    type="text"
                                     value={filter}
                                     onChange={(e) => setFilter(e.target.value)}
-                                    placeholder="Type artist name..." 
+                                    placeholder="Type artist name..."
                                     className="w-full px-4 py-2 bg-black/60 border border-green-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
+                                    style={{boxShadow: "0 0 8px rgba(0, 255, 128, 0.2)"}}
                                 />
                             </div>
-                            
-                            {/* Day filter */}
+
+                            {/* Filter by Day */}
                             <div>
-                                <label className="block text-purple-400 mb-2 font-medium">
+                                <label className="block text-purple-400 mb-2"
+                                       style={{textShadow: "0 0 5px rgba(128, 0, 255, 0.4)"}}>
                                     Filter by Day
                                 </label>
-                                <select 
+                                <select
                                     value={day}
                                     onChange={(e) => setDay(e.target.value)}
                                     className="w-full px-4 py-2 bg-black/60 border border-purple-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                                    style={{boxShadow: "0 0 8px rgba(128, 0, 255, 0.2)"}}
                                 >
                                     {days.map(day => (
                                         <option key={day} value={day}>{day}</option>
                                     ))}
                                 </select>
                             </div>
-                            
-                            {/* Category filter */}
+
+                            {/* Filter by Category */}
                             <div>
-                                <label className="block text-blue-400 mb-2 font-medium">
+                                <label className="block text-blue-400 mb-2"
+                                       style={{textShadow: "0 0 5px rgba(0, 128, 255, 0.4)"}}>
                                     Filter by Category
                                 </label>
-                                <select 
+                                <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="w-full px-4 py-2 bg-black/60 border border-blue-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
+                                    style={{boxShadow: "0 0 8px rgba(0, 128, 255, 0.2)"}}
                                 >
                                     <option value="All">All</option>
                                     <option value="Headliner">Headliner</option>
@@ -269,22 +276,22 @@ const ElectricForestLineup = () => {
                                 </select>
                             </div>
                         </div>
-                        
-                    </Shimmer>
-                    
-                    {/* Artist listing */}
-                    <Shimmer className="bg-gradient-to-r from-black/80 to-black/40 backdrop-blur-md p-6 rounded-xl border border-purple-500/20 shadow-[0_0_15px_rgba(128,0,255,0.2)]">
+                    </div>
+
+                    {/* Artist List */}
+                    <div className="bg-black/30 border border-purple-500/20 rounded-lg p-6 mb-8"
+                         style={{boxShadow: "0 0 15px rgba(128, 0, 255, 0.15)"}}>
                         <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-purple-400">
-                                Artists {filteredArtists.length > 0 && `(${filteredArtists.length})`}
+                            <h2 className="text-xl font-bold text-purple-400"
+                                style={{textShadow: "0 0 8px rgba(128, 0, 255, 0.4)"}}>
+                                Artists ({filteredArtists.length})
                             </h2>
-                            
                             <div className="text-sm text-gray-400">
-                                Selected: {Object.values(selectedArtists).filter(Boolean).length}
+                                Selected: {selectedCount}
                             </div>
                         </div>
-                        
-                        <ArtistTable 
+
+                        <ArtistTable
                             sortedArtists={sortedArtists}
                             selectedArtists={selectedArtists}
                             toggleArtistSelection={toggleArtistSelection}
@@ -294,7 +301,7 @@ const ElectricForestLineup = () => {
                             sortDirection={sortDirection}
                             musicService={musicService}
                         />
-                    </Shimmer>
+                    </div>
                     
                     {/* Action buttons */}
                     <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">

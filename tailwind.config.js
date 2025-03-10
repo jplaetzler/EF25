@@ -8,11 +8,11 @@ export default {
     extend: {
       colors: {
         forest: {
-          primary: '#2C5F2D',    // Deep forest green
-          secondary: '#97BC62',  // Light moss green
-          accent: '#FFB30F',     // Golden sunlight 
-          dark: '#1E3F20',       // Dark forest shade
-          light: '#C2E7C9',      // Light foliage
+          primary: '#00FF80',    // Bright green (for primary elements)
+          secondary: '#8A2BE2',  // Vibrant purple (for secondary elements)
+          accent: '#00FFFF',     // Cyan (for accents)
+          dark: '#071507',       // Very dark green (for backgrounds)
+          light: '#7DF9FF',      // Light cyan (for highlights)
         }
       },
       fontSize: {
@@ -36,13 +36,18 @@ export default {
           '100%': { transform: 'translateX(100%)' }
         },
         pulse: {
-          '0%, 100%': { opacity: 1 },
-          '50%': { opacity: 0.5 }
+          '0%, 100%': { opacity: 0.6 },
+          '50%': { opacity: 1 }
+        },
+        glow: {
+          '0%, 100%': { textShadow: '0 0 15px rgba(0, 255, 128, 0.7)' },
+          '50%': { textShadow: '0 0 25px rgba(0, 255, 128, 0.9)' }
         }
       },
       animation: {
         shimmer: 'shimmer 2s infinite',
-        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
+        pulse: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        glow: 'glow 3s infinite ease-in-out'
       }
     },
   },

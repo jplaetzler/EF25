@@ -1,48 +1,177 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* src/App.css */
+/* Instead of @tailwind directives or incorrect imports, use this: */
+
+@import "tailwindcss/preflight.css";
+@import "tailwindcss/utilities.css";
+
+/* Then add your custom styles */
+body {
+    min-height: 100vh;
+    background-color: #071507;
+    background-image:
+            radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%),
+            linear-gradient(180deg, #040a04 0%, #071e15 100%);
+    background-attachment: fixed;
+}
 
 /* Custom animations */
 @keyframes shimmer {
-  0% {
-    transform: translateY(-100%) translateX(-100%) rotate(-45deg);
-  }
-  50% {
-    transform: translateY(100%) translateX(100%) rotate(-45deg);
-  }
-  100% {
-    transform: translateY(100%) translateX(100%) rotate(-45deg);
-  }
+    0% {
+        transform: translateY(-100%) translateX(-100%) rotate(-45deg);
+    }
+    50% {
+        transform: translateY(100%) translateX(100%) rotate(-45deg);
+    }
+    100% {
+        transform: translateY(100%) translateX(100%) rotate(-45deg);
+    }
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 0.8;
-  }
-  50% {
-    opacity: 1;
-  }
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
 }
 
 @keyframes firefly {
-  0% {
-    opacity: 0;
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }
 
+/* Add to App.css or create a new file like electric-forest.css */
 body {
-  min-height: 100vh;
-  background-color: #071507;
-  background-image: 
-    radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%),
-    linear-gradient(180deg, #040a04 0%, #071e15 100%);
-  background-attachment: fixed;
+    min-height: 100vh;
+    background-color: #071507;
+    background-image:
+            radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
+            radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%),
+            linear-gradient(180deg, #040a04 0%, #071e15 100%);
+    background-attachment: fixed;
+}
+
+/* Add firefly effect elements */
+.firefly {
+    position: fixed;
+    border-radius: 50%;
+    background-color: rgba(173, 255, 47, 0.8);
+    box-shadow: 0 0 10px 2px rgba(173, 255, 47, 0.3);
+    opacity: 0;
+    animation: firefly 3s infinite ease-in-out;
+}
+
+/* Define animations */
+@keyframes firefly {
+    0% { opacity: 0; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0; }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Add this to your page content */
+.ef-container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+}
+
+.ef-title {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #00ff80;
+    text-shadow: 0 0 15px rgba(0, 255, 128, 0.5), 0 0 30px rgba(128, 0, 255, 0.3);
+    letter-spacing: 0.05em;
+}
+
+/* Add to App.css */
+/* Custom animations */
+@keyframes shimmer {
+    0% {
+        transform: translateY(-100%) translateX(-100%) rotate(-45deg);
+    }
+    50% {
+        transform: translateY(100%) translateX(100%) rotate(-45deg);
+    }
+    100% {
+        transform: translateY(100%) translateX(100%) rotate(-45deg);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 0.8;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
+@keyframes firefly {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* Enhanced backgrounds */
+.bg-forest-dark {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 255, 128, 0.2);
+    box-shadow: 0 0 15px rgba(0, 255, 128, 0.15);
+}
+
+.filter-container {
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(0, 255, 128, 0.2);
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 15px rgba(0, 255, 128, 0.15);
+}
+
+.search-field {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid rgba(0, 255, 128, 0.3);
+    border-radius: 0.25rem;
+    color: white;
+    outline: none;
+}
+
+.search-field:focus {
+    border-color: rgba(0, 255, 128, 0.7);
+    box-shadow: 0 0 8px rgba(0, 255, 128, 0.3);
+}
+
+/* Glow effect for important elements */
+.glow-text {
+    text-shadow: 0 0 8px rgba(0, 255, 128, 0.7);
+}
+
+.glow-box {
+    box-shadow: 0 0 15px rgba(0, 255, 128, 0.3);
 }

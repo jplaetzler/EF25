@@ -10,48 +10,25 @@ function App() {
         <ThemeProvider>
             <div className="min-h-screen w-full relative">
                 {/* Firefly effect elements */}
-                <div className="fixed w-2 h-2 bg-forest-secondary rounded-full opacity-0 blur-[1px]" 
-                    style={{ 
-                        top: '20%', 
-                        left: '10%',
-                        animation: 'firefly 3s infinite ease-in-out',
-                        animationDelay: '0.5s'
-                    }}></div>
-                <div className="fixed w-1 h-1 bg-blue-400 rounded-full opacity-0 blur-[1px]" 
-                    style={{ 
-                        top: '35%', 
-                        left: '80%',
-                        animation: 'firefly 4s infinite ease-in-out',
-                        animationDelay: '1.2s'
-                    }}></div>
-                <div className="fixed w-2 h-2 bg-purple-400 rounded-full opacity-0 blur-[1px]" 
-                    style={{ 
-                        top: '70%', 
-                        left: '25%',
-                        animation: 'firefly 5s infinite ease-in-out',
-                        animationDelay: '0.8s'
-                    }}></div>
-                <div className="fixed w-1 h-1 bg-teal-400 rounded-full opacity-0 blur-[1px]" 
-                    style={{ 
-                        top: '55%', 
-                        left: '90%',
-                        animation: 'firefly 3.5s infinite ease-in-out',
-                        animationDelay: '1.7s'
-                    }}></div>
-                <div className="fixed w-2 h-2 bg-forest-secondary rounded-full opacity-0 blur-[1px]" 
-                    style={{ 
-                        top: '85%', 
-                        left: '60%',
-                        animation: 'firefly 4.5s infinite ease-in-out',
-                        animationDelay: '2.1s'
-                    }}></div>
-                <div className="fixed w-1 h-1 bg-indigo-400 rounded-full opacity-0 blur-[1px]" 
-                    style={{ 
-                        top: '15%', 
-                        left: '45%',
-                        animation: 'firefly 5s infinite ease-in-out',
-                        animationDelay: '1.5s'
-                    }}></div>
+                {[...Array(15)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="fixed rounded-full bg-white"
+                        style={{
+                            width: `${Math.random() * 4 + 1}px`,
+                            height: `${Math.random() * 4 + 1}px`,
+                            top: `${Math.random() * 100}%`,
+                            left: `${Math.random() * 100}%`,
+                            opacity: 0,
+                            filter: "blur(1px)",
+                            backgroundColor: i % 3 === 0 ? "#00ff80" : i % 3 === 1 ? "#00ffff" : "#ff00ff",
+                            boxShadow: i % 3 === 0 ? "0 0 5px rgba(0, 255, 128, 0.7)" :
+                                i % 3 === 1 ? "0 0 5px rgba(0, 255, 255, 0.7)" :
+                                    "0 0 5px rgba(255, 0, 255, 0.7)",
+                            animation: `firefly ${Math.random() * 3 + 2}s infinite ease-in-out ${Math.random() * 2}s`
+                        }}
+                    ></div>
+                ))}
                 
                 {/* Theme toggle controls */}
                 <div className="fixed top-4 right-4 z-50">
