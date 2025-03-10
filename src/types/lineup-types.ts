@@ -5,9 +5,3 @@ export interface ArtistData {
     spotifyId: string;
     youtubeId: string;
 }
-
-export interface ColumnPreferences {
-    name: boolean;
-    category: boolean;
-    day: boolean;
-}

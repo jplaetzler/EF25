@@ -1,39 +1,16 @@
-import { useState, useRef, useEffect } from 'react';
-import { ArtistTable } from './lineup/ArtistTable';
-import { PlaylistModal } from './lineup/PlaylistModal';
-import { TextExport } from './lineup/TextExport';
-import { ColumnPreferences } from '../types/lineup-types';
-import { artists as allArtists } from '../data/artists.tsx';
-import { useTheme } from '../theme/hooks/useTheme';
-import Shimmer from '../theme/components/Shimmer';
-import { LineupHeader } from './lineup/LineupHeader';
+import React, { useState, useRef } from 'react';
+import { artists as allArtists } from '../data/artists';
 
-const ElectricForestLineup = () => {
-    const copyRef = useRef<HTMLTextAreaElement>(null);
-    const { getButtonClasses } = useTheme();
-
-    // Add state for selected artists and column preferences
+const ElectricForestLineup: React.FC = () => {
+    useRef<HTMLTextAreaElement>(null);
+// State for artist selection and column preferences
     const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>({});
-    const [columnPreferences] = useState<ColumnPreferences>({
-        name: true,
-        category: true,
-        day: true
-    });
-
-    // New state for music service preference
-    const [musicService] = useState<string>("spotify");
-
-    // State for filtering and sorting
-    const [filter, setFilter] = useState("");
-    const [category, setCategory] = useState("All");
-    const [day, setDay] = useState("All");
-    const [sortBy, setSortBy] = useState("category");
-    const [sortDirection, setSortDirection] = useState("asc");
-
-    // State for playlist creation
-    const [showPlaylistModal, setShowPlaylistModal] = useState(false);
-    const [playlistName, setPlaylistName] = useState("Electric Forest 2025 Mix");
-    const [isCreatingPlaylist, setIsCreatingPlaylist] = useState(false);
+// State for filtering and sorting
+    const [filter, setFilter] = useState<string>("");
+    const [category, setCategory] = useState<string>("All");
+    const [day, setDay] = useState<string>("All");
+    const [sortBy, setSortBy] = useState<string>("category");
+    const [sortDirection, setSortDirection] = useState<string>("asc");
 
     // Filter artists based on current filters
     const filteredArtists = allArtists.filter(artist => {
@@ -49,7 +26,6 @@ const ElectricForestLineup = () => {
         if (sortBy === "name") {
             comparison = a.name.localeCompare(b.name);
         } else if (sortBy === "category") {
-            // Sort by category first, then by name
             comparison = a.category.localeCompare(b.category);
             if (comparison === 0) {
                 comparison = a.name.localeCompare(b.name);
@@ -65,7 +41,7 @@ const ElectricForestLineup = () => {
     });
 
     // Handle sort toggle
-    const handleSort = (column: string) => {
+    const handleSort = (column: string): void => {
         if (sortBy === column) {
             setSortDirection(sortDirection === "asc" ? "desc" : "asc");
         } else {
@@ -77,47 +53,8 @@ const ElectricForestLineup = () => {
     // Get unique days for filtering
     const days = ["All", ...Array.from(new Set(allArtists.map(artist => artist.day).filter(day => day !== "")))];
 
-    // Note: Removed stats calculation as we're not using this functionality
-
-    // Function to copy filtered artists to clipboard
-    const copyToClipboard = () => {
-        // Get selected artists or use filtered list if none selected
-        const artistsToCopy = Object.keys(selectedArtists).length > 0
-            ? sortedArtists.filter(artist => selectedArtists[artist.name])
-            : sortedArtists;
-
-        // Format the text based on column preferences
-        const textToCopy = artistsToCopy.map(artist => {
-            const parts = [];
-            if (columnPreferences.name) parts.push(artist.name);
-            if (columnPreferences.category) parts.push(artist.category);
-            if (columnPreferences.day && artist.day) parts.push(artist.day);
-            return parts.join(' - ');
-        }).join('\n');
-
-        // Create a temporary textarea element
-        const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
-        document.body.appendChild(textarea);
-        textarea.select();
-
-        try {
-            // Execute copy command
-            document.execCommand('copy');
-            alert(`${artistsToCopy.length} artists copied to clipboard!`);
-        } catch (err) {
-            console.error('Failed to copy: ', err);
-            alert('Failed to copy to clipboard. Please try again.');
-        }
-
-        // Clean up
-        document.body.removeChild(textarea);
-    };
-
-    // Note: removed downloadAsCsv function as it's not used in this version
-
     // Toggle selection of an artist
-    const toggleArtistSelection = (artistName: string) => {
+    const toggleArtistSelection = (artistName: string): void => {
         setSelectedArtists(prev => ({
             ...prev,
             [artistName]: !prev[artistName]
@@ -125,14 +62,11 @@ const ElectricForestLineup = () => {
     };
 
     // Select/deselect all visible artists
-    const toggleAllArtists = () => {
+    const toggleAllArtists = (): void => {
         const someSelected = sortedArtists.some(artist => selectedArtists[artist.name]);
-
         if (someSelected) {
-            // If any selected, clear all selections
             setSelectedArtists({});
         } else {
-            // Select all currently filtered artists
             const newSelected: Record<string, boolean> = {};
             sortedArtists.forEach(artist => {
                 newSelected[artist.name] = true;
@@ -141,244 +75,302 @@ const ElectricForestLineup = () => {
         }
     };
 
-    // Note: removed toggleColumnPreference function as it's not used in this version
-
     // Count selected artists
     const selectedCount = Object.values(selectedArtists).filter(Boolean).length;
-    
-    // Note: removed openSelectedArtists function as it's not used in this version
-
-    // Function to create a playlist (simulation)
-    const createPlaylist = () => {
-        const selectedArtistsList = sortedArtists.filter(artist => selectedArtists[artist.name]);
-
-        if (selectedArtistsList.length === 0) {
-            alert("Please select at least one artist for your playlist.");
-            return;
-        }
-
-        setIsCreatingPlaylist(true);
-
-        // This would normally connect to the Spotify/YouTube API
-        // For now, we'll simulate the process
-        setTimeout(() => {
-            setIsCreatingPlaylist(false);
-            setShowPlaylistModal(false);
-
-            const service = musicService === "spotify" ? "Spotify" : "YouTube Music";
-            alert(`Your "${playlistName}" would now be created on ${service} with tracks from ${selectedArtistsList.length} artists!\n\nNote: This is a simulation. To create actual playlists, this app would need to connect to the ${service} API with proper authentication.`);
-        }, 2000);
-    };
-
-    // Effect to update the hidden textarea content for copying
-    useEffect(() => {
-        if (copyRef.current) {
-            const artistsToShow = Object.keys(selectedArtists).length > 0
-                ? sortedArtists.filter(artist => selectedArtists[artist.name])
-                : sortedArtists;
-
-            (copyRef.current as HTMLTextAreaElement).value = artistsToShow.map(artist => {
-                const parts = [];
-                if (columnPreferences.name) parts.push(artist.name);
-                if (columnPreferences.category) parts.push(artist.category);
-                if (columnPreferences.day && artist.day) parts.push(artist.day);
-                return parts.join(' - ');
-            }).join('\n');
-        }
-    }, [selectedArtists, sortedArtists, columnPreferences]);
 
     return (
-        <div className="min-h-screen bg-black text-white font-sans overflow-hidden">
-            {/* Forest-inspired animated background */}
-            <div className="fixed inset-0 z-0 opacity-20">
-                <div className="absolute h-full w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-green-900 via-transparent to-transparent"></div>
-                <div className="absolute h-full w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900 via-transparent to-transparent opacity-50" style={{top: '30%', left: '70%'}}></div>
-                <div className="absolute h-full w-full bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-blue-900 via-transparent to-transparent opacity-50" style={{top: '70%', left: '20%'}}></div>
-                
-                {/* Animated circles for firefly effect */}
-                {[...Array(20)].map((_, i) => (
-                    <div 
-                        key={i}
-                        className="absolute rounded-full bg-white"
-                        style={{
-                            width: `${Math.random() * 4 + 1}px`,
-                            height: `${Math.random() * 4 + 1}px`,
-                            top: `${Math.random() * 100}%`,
-                            left: `${Math.random() * 100}%`,
-                            opacity: 0.6,
-                            boxShadow: '0 0 10px 2px rgba(255, 255, 255, 0.3)',
-                            animation: `pulse ${Math.random() * 3 + 2}s infinite alternate ease-in-out ${Math.random() * 2}s`
-                        }}
-                    ></div>
-                ))}
-            </div>
+        <div className="min-h-screen"
+             style={{
+                 backgroundColor: '#071507',
+                 backgroundImage: `
+             radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
+             radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
+             radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%)
+           `,
+                 color: 'white',
+                 position: 'relative'
+             }}>
 
-            <div className="relative z-10 container mx-auto px-4 py-8">
-                {/* Header with logo */}
-                <LineupHeader />
+            {/* Firefly effect elements */}
+            {[...Array(25)].map((_, i) => (
+                <div
+                    key={i}
+                    style={{
+                        position: 'fixed',
+                        width: `${Math.random() * 3 + 1}px`,
+                        height: `${Math.random() * 3 + 1}px`,
+                        borderRadius: '50%',
+                        backgroundColor: i % 3 === 0 ? '#00ff80' : i % 3 === 1 ? '#8A2BE2' : '#00ffff',
+                        boxShadow: i % 3 === 0 ? '0 0 5px #00ff80' : i % 3 === 1 ? '0 0 5px #8A2BE2' : '0 0 5px #00ffff',
+                        opacity: 0,
+                        top: `${Math.random() * 100}%`,
+                        left: `${Math.random() * 100}%`,
+                        animation: `firefly ${Math.random() * 3 + 2}s infinite ease-in-out ${Math.random() * 3}s`,
+                        zIndex: 1
+                    }}
+                ></div>
+            ))}
 
-                {/* Main content */}
-                <div className="max-w-7xl mx-auto">
-                    {/* Filters section */}
-                    <div className="bg-black/30 border border-green-500/20 rounded-lg p-6 mb-8"
-                         style={{boxShadow: "0 0 15px rgba(0, 255, 128, 0.15)"}}>
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                            {/* Search Artists */}
-                            <div>
-                                <label className="block text-green-400 mb-2"
-                                       style={{textShadow: "0 0 5px rgba(0, 255, 128, 0.4)"}}>
-                                    Search Artists
-                                </label>
-                                <input
-                                    type="text"
-                                    value={filter}
-                                    onChange={(e) => setFilter(e.target.value)}
-                                    placeholder="Type artist name..."
-                                    className="w-full px-4 py-2 bg-black/60 border border-green-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-green-500/50"
-                                    style={{boxShadow: "0 0 8px rgba(0, 255, 128, 0.2)"}}
-                                />
-                            </div>
+            {/* Main content */}
+            <div style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+                {/* Header */}
+                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                    <h1 style={{
+                        color: '#00FF80',
+                        fontSize: '2.5rem',
+                        fontWeight: 'bold',
+                        textShadow: '0 0 10px rgba(0, 255, 128, 0.7), 0 0 20px rgba(0, 255, 128, 0.4)'
+                    }}>
+                        ELECTRIC FOREST
+                    </h1>
+                    <p style={{ color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)' }}>
+                        JUNE 19-22, 2025 • ROTHBURY, MI
+                    </p>
+                    <p style={{
+                        color: '#00FF80',
+                        marginTop: '10px',
+                        fontSize: '1.2rem',
+                        textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'
+                    }}>
+                        LINEUP EXPLORER
+                    </p>
+                </div>
 
-                            {/* Filter by Day */}
-                            <div>
-                                <label className="block text-purple-400 mb-2"
-                                       style={{textShadow: "0 0 5px rgba(128, 0, 255, 0.4)"}}>
-                                    Filter by Day
-                                </label>
-                                <select
-                                    value={day}
-                                    onChange={(e) => setDay(e.target.value)}
-                                    className="w-full px-4 py-2 bg-black/60 border border-purple-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50"
-                                    style={{boxShadow: "0 0 8px rgba(128, 0, 255, 0.2)"}}
-                                >
-                                    {days.map(day => (
-                                        <option key={day} value={day}>{day}</option>
-                                    ))}
-                                </select>
-                            </div>
-
-                            {/* Filter by Category */}
-                            <div>
-                                <label className="block text-blue-400 mb-2"
-                                       style={{textShadow: "0 0 5px rgba(0, 128, 255, 0.4)"}}>
-                                    Filter by Category
-                                </label>
-                                <select
-                                    value={category}
-                                    onChange={(e) => setCategory(e.target.value)}
-                                    className="w-full px-4 py-2 bg-black/60 border border-blue-500/40 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-                                    style={{boxShadow: "0 0 8px rgba(0, 128, 255, 0.2)"}}
-                                >
-                                    <option value="All">All</option>
-                                    <option value="Headliner">Headliner</option>
-                                    <option value="Featured Artists">Featured Artists</option>
-                                    <option value="Supporting Artists">Supporting Artists</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Artist List */}
-                    <div className="bg-black/30 border border-purple-500/20 rounded-lg p-6 mb-8"
-                         style={{boxShadow: "0 0 15px rgba(128, 0, 255, 0.15)"}}>
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-bold text-purple-400"
-                                style={{textShadow: "0 0 8px rgba(128, 0, 255, 0.4)"}}>
-                                Artists ({filteredArtists.length})
-                            </h2>
-                            <div className="text-sm text-gray-400">
-                                Selected: {selectedCount}
-                            </div>
-                        </div>
-
-                        <ArtistTable
-                            sortedArtists={sortedArtists}
-                            selectedArtists={selectedArtists}
-                            toggleArtistSelection={toggleArtistSelection}
-                            toggleAllArtists={toggleAllArtists}
-                            handleSort={handleSort}
-                            sortBy={sortBy}
-                            sortDirection={sortDirection}
-                            musicService={musicService}
+                {/* Controls section - Laid out exactly as in screenshot */}
+                <div style={{ marginBottom: '20px' }}>
+                    <div style={{ marginBottom: '10px' }}>
+                        <div>Search Artists</div>
+                        <input
+                            type="text"
+                            value={filter}
+                            onChange={(e) => setFilter(e.target.value)}
+                            placeholder="Type artist name..."
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                border: '1px solid rgba(0, 255, 128, 0.3)',
+                                color: 'white',
+                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
+                                outline: 'none'
+                            }}
                         />
                     </div>
-                    
-                    {/* Action buttons */}
-                    <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Shimmer className="overflow-hidden">
-                            <button 
-                                onClick={copyToClipboard}
-                                className={`${getButtonClasses('primary')} w-full relative overflow-hidden group`}
-                                style={{boxShadow: '0 0 15px rgba(0, 255, 128, 0.3)'}}
-                            >
-                                <div className="absolute inset-0 w-full h-full">
-                                    <div className="absolute w-8 h-32 bg-white/20 -rotate-45 top-0 -left-32 transform group-hover:translate-x-96 transition-transform duration-1000"></div>
-                                </div>
-                                <span className="relative">
-                                    Export Selected Artists
-                                </span>
-                            </button>
-                        </Shimmer>
-                        
-                        <Shimmer className="overflow-hidden">
-                            <button 
-                                onClick={() => setShowPlaylistModal(true)}
-                                className={`${getButtonClasses('secondary')} w-full relative overflow-hidden group`}
-                                style={{boxShadow: '0 0 15px rgba(128, 0, 255, 0.3)'}}
-                            >
-                                <div className="absolute inset-0 w-full h-full">
-                                    <div className="absolute w-8 h-32 bg-white/20 -rotate-45 top-0 -left-32 transform group-hover:translate-x-96 transition-transform duration-1000"></div>
-                                </div>
-                                <span className="relative">
-                                    Create {musicService === "spotify" ? "Spotify" : "YouTube"} Playlist
-                                </span>
-                            </button>
-                        </Shimmer>
+
+                    <div style={{ marginBottom: '10px' }}>
+                        <div>Filter by Day</div>
+                        <select
+                            value={day}
+                            onChange={(e) => setDay(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                border: '1px solid rgba(0, 255, 128, 0.3)',
+                                color: 'white',
+                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
+                                appearance: 'none'
+                            }}
+                        >
+                            {days.map(d => (
+                                <option key={d} value={d}>{d}</option>
+                            ))}
+                        </select>
                     </div>
 
-                    <TextExport 
-                        copyRef={copyRef}
-                        selectedArtists={selectedArtists}
-                        sortedArtists={sortedArtists}
-                        columnPreferences={columnPreferences}
-                    />
+                    <div style={{ marginBottom: '10px' }}>
+                        <div>Filter by Category</div>
+                        <select
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                border: '1px solid rgba(0, 255, 128, 0.3)',
+                                color: 'white',
+                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
+                                appearance: 'none'
+                            }}
+                        >
+                            <option value="All">All</option>
+                            <option value="Headliner">Headliner</option>
+                            <option value="Featured Artists">Featured Artists</option>
+                            <option value="Supporting Artists">Supporting Artists</option>
+                        </select>
+                    </div>
 
-                    {showPlaylistModal && (
-                        <PlaylistModal 
-                            isCreatingPlaylist={isCreatingPlaylist}
-                            setShowPlaylistModal={setShowPlaylistModal}
-                            playlistName={playlistName}
-                            setPlaylistName={setPlaylistName}
-                            selectedCount={selectedCount}
-                            createPlaylist={createPlaylist}
-                            musicService={musicService}
-                        />
-                    )}
+                    <div style={{ marginBottom: '10px' }}>
+                        <div>Music Service Links</div>
+                        <div style={{
+                            padding: '10px',
+                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                            border: '1px solid rgba(0, 255, 128, 0.3)',
+                            color: 'white',
+                            boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)'
+                        }}>
+                            Spotify•YouTube
+                        </div>
+                    </div>
+                </div>
+
+                {/* Artists section - Matching the screenshot layout */}
+                <div style={{ marginBottom: '20px' }}>
+                    <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        marginBottom: '10px'
+                    }}>
+                        <div>Artists ({filteredArtists.length})</div>
+                        <div>Selected: {selectedCount}</div>
+                    </div>
+
+                    <div style={{
+                        border: '1px solid rgba(0, 255, 128, 0.3)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
+                        boxShadow: '0 0 10px rgba(0, 255, 128, 0.15)'
+                    }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                            <tr style={{ borderBottom: '1px solid rgba(0, 255, 128, 0.3)' }}>
+                                <th style={{
+                                    padding: '10px',
+                                    textAlign: 'left',
+                                    width: '40px'
+                                }}>
+                                    <input
+                                        type="checkbox"
+                                        onChange={toggleAllArtists}
+                                        checked={sortedArtists.length > 0 && sortedArtists.every(artist => selectedArtists[artist.name])}
+                                    />
+                                </th>
+                                <th
+                                    onClick={() => handleSort("name")}
+                                    style={{
+                                        padding: '10px',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        color: '#00FF80',
+                                        textShadow: '0 0 5px rgba(0, 255, 128, 0.4)'
+                                    }}
+                                >
+                                    ARTIST
+                                    {sortBy === "name" && (
+                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
+                                    )}
+                                </th>
+                                <th
+                                    onClick={() => handleSort("category")}
+                                    style={{
+                                        padding: '10px',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        color: '#8A2BE2',
+                                        textShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
+                                    }}
+                                >
+                                    CATEGORY
+                                    {sortBy === "category" && (
+                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
+                                    )}
+                                </th>
+                                <th
+                                    onClick={() => handleSort("day")}
+                                    style={{
+                                        padding: '10px',
+                                        textAlign: 'left',
+                                        cursor: 'pointer',
+                                        color: '#00BFFF',
+                                        textShadow: '0 0 5px rgba(0, 191, 255, 0.4)'
+                                    }}
+                                >
+                                    DAY
+                                    {sortBy === "day" && (
+                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
+                                    )}
+                                </th>
+                                <th style={{
+                                    padding: '10px',
+                                    textAlign: 'left',
+                                    color: '#FFFF00',
+                                    textShadow: '0 0 5px rgba(255, 255, 0, 0.4)'
+                                }}>
+                                    LISTEN
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {sortedArtists.map((artist, idx) => (
+                                <tr key={artist.name}
+                                    style={{
+                                        backgroundColor: idx % 2 === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.5)',
+                                        borderBottom: '1px solid rgba(0, 255, 128, 0.1)'
+                                    }}>
+                                    <td style={{ padding: '10px' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={!!selectedArtists[artist.name]}
+                                            onChange={() => toggleArtistSelection(artist.name)}
+                                        />
+                                    </td>
+                                    <td style={{
+                                        padding: '10px',
+                                        color: artist.category === 'Headliner' ? '#00FFFF' : 'white',
+                                        fontWeight: artist.category === 'Headliner' ? 'bold' : 'normal',
+                                        textShadow: artist.category === 'Headliner' ? '0 0 5px rgba(0, 255, 255, 0.6)' : 'none'
+                                    }}>
+                                        {artist.name}
+                                    </td>
+                                    <td style={{ padding: '10px' }}>
+                      <span style={{
+                          display: 'inline-block',
+                          padding: '5px 15px',
+                          borderRadius: '20px',
+                          fontSize: '0.85rem',
+                          textAlign: 'center',
+                          backgroundColor: 'rgba(138, 43, 226, 0.6)',
+                          color: 'white',
+                          boxShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
+                      }}>
+                        {artist.category}
+                      </span>
+                                    </td>
+                                    <td style={{ padding: '10px' }}>
+                                        {artist.day || "TBA"}
+                                    </td>
+                                    <td style={{ padding: '10px' }}>
+                                        <a
+                                            href={`https://open.spotify.com/artist/${artist.spotifyId}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            style={{
+                                                display: 'inline-block',
+                                                padding: '5px 15px',
+                                                borderRadius: '20px',
+                                                fontSize: '0.85rem',
+                                                backgroundColor: 'rgba(0, 128, 0, 0.7)',
+                                                color: 'white',
+                                                textDecoration: 'none',
+                                                boxShadow: '0 0 5px rgba(0, 128, 0, 0.4)'
+                                            }}
+                                        >
+                                            Spotify
+                                        </a>
+                                    </td>
+                                </tr>
+                            ))}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-            
-            {/* Footer */}
-            <footer className="relative z-10 text-center py-8 mt-12 text-gray-400 text-sm">
-                <p>Electric Forest 2025 • Rothbury, MI • June 19-22, 2025</p>
-            </footer>
-            
+
+            {/* Animations */}
             <style>{`
-                @keyframes pulse {
-                    0% { opacity: 0.3; }
-                    50% { opacity: 0.7; }
-                    100% { opacity: 0.3; }
-                }
-                
-                @keyframes shimmer {
-                    0% {
-                        transform: translateY(-100%) translateX(-100%) rotate(-45deg);
-                    }
-                    50% {
-                        transform: translateY(100%) translateX(100%) rotate(-45deg);
-                    }
-                    100% {
-                        transform: translateY(100%) translateX(100%) rotate(-45deg);
-                    }
+                @keyframes firefly {
+                    0% { opacity: 0; }
+                    50% { opacity: 0.8; }
+                    100% { opacity: 0; }
                 }
             `}</style>
         </div>

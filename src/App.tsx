@@ -1,13 +1,10 @@
 import { lazy, Suspense } from 'react'
-import './App.css'
-import { ThemeProvider } from './theme/ThemeContext'
-import ThemeToggle from './theme/components/ThemeToggle'
 
 const ElectricForestLineup = lazy(() => import('./components/ElectricForestLineup'))
 
 function App() {
     return (
-        <ThemeProvider>
+
             <div className="min-h-screen w-full relative">
                 {/* Firefly effect elements */}
                 {[...Array(15)].map((_, i) => (
@@ -29,11 +26,6 @@ function App() {
                         }}
                     ></div>
                 ))}
-                
-                {/* Theme toggle controls */}
-                <div className="fixed top-4 right-4 z-50">
-                    <ThemeToggle />
-                </div>
                     
                 <Suspense fallback={
                     <div className="flex items-center justify-center h-screen">
@@ -49,7 +41,7 @@ function App() {
                     <ElectricForestLineup />
                 </Suspense>
             </div>
-        </ThemeProvider>
+
     )
 }
 
