@@ -26,7 +26,13 @@ const ElectricForestLineup: React.FC = () => {
         if (sortBy === "name") {
             comparison = a.name.localeCompare(b.name);
         } else if (sortBy === "category") {
-            comparison = a.category.localeCompare(b.category);
+            // Custom category order: Headliner, Featured Artists, Supporting Artists
+            const categoryOrder: Record<string, number> = {
+                "Headliner": 0,
+                "Featured Artists": 1,
+                "Supporting Artists": 2
+            };
+            comparison = (categoryOrder[a.category] ?? 999) - (categoryOrder[b.category] ?? 999);
             if (comparison === 0) {
                 comparison = a.name.localeCompare(b.name);
             }
@@ -200,18 +206,6 @@ const ElectricForestLineup: React.FC = () => {
                         </select>
                     </div>
 
-                    <div style={{ marginBottom: '10px' }}>
-                        <div>Music Service Links</div>
-                        <div style={{
-                            padding: '10px',
-                            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                            border: '1px solid rgba(0, 255, 128, 0.3)',
-                            color: 'white',
-                            boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)'
-                        }}>
-                            Spotify•YouTube
-                        </div>
-                    </div>
                 </div>
 
                 {/* Artists section - Matching the screenshot layout */}
@@ -328,9 +322,17 @@ const ElectricForestLineup: React.FC = () => {
                           borderRadius: '20px',
                           fontSize: '0.85rem',
                           textAlign: 'center',
-                          backgroundColor: 'rgba(138, 43, 226, 0.6)',
+                          backgroundColor: artist.category === 'Headliner' 
+                            ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
+                            : artist.category === 'Featured Artists' 
+                              ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
+                              : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
                           color: 'white',
-                          boxShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
+                          boxShadow: artist.category === 'Headliner'
+                            ? '0 0 8px rgba(128, 0, 128, 0.5)'
+                            : artist.category === 'Featured Artists'
+                              ? '0 0 6px rgba(147, 112, 219, 0.5)'
+                              : '0 0 5px rgba(186, 85, 211, 0.4)'
                       }}>
                         {artist.category}
                       </span>
@@ -339,23 +341,47 @@ const ElectricForestLineup: React.FC = () => {
                                         {artist.day || "TBA"}
                                     </td>
                                     <td style={{ padding: '10px' }}>
-                                        <a
-                                            href={`https://open.spotify.com/artist/${artist.spotifyId}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            style={{
-                                                display: 'inline-block',
-                                                padding: '5px 15px',
-                                                borderRadius: '20px',
-                                                fontSize: '0.85rem',
-                                                backgroundColor: 'rgba(0, 128, 0, 0.7)',
-                                                color: 'white',
-                                                textDecoration: 'none',
-                                                boxShadow: '0 0 5px rgba(0, 128, 0, 0.4)'
-                                            }}
-                                        >
-                                            Spotify
-                                        </a>
+                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                            {artist.youtubeId && (
+                                                <a
+                                                    href={`https://music.youtube.com/channel/${artist.youtubeId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        padding: '5px 15px',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.85rem',
+                                                        backgroundColor: 'rgba(255, 0, 0, 0.7)',
+                                                        color: 'white',
+                                                        textDecoration: 'none',
+                                                        boxShadow: '0 0 5px rgba(255, 0, 0, 0.4)'
+                                                    }}
+                                                >
+                                                    YouTube Music
+                                                </a>
+                                            )}
+                                            
+                                            {artist.spotifyId && (
+                                                <a
+                                                    href={`https://open.spotify.com/artist/${artist.spotifyId}`}
+                                                    target="_blank"
+                                                    rel="noopener noreferrer"
+                                                    style={{
+                                                        display: 'inline-block',
+                                                        padding: '5px 15px',
+                                                        borderRadius: '20px',
+                                                        fontSize: '0.85rem',
+                                                        backgroundColor: 'rgba(30, 215, 96, 0.7)',
+                                                        color: 'white',
+                                                        textDecoration: 'none',
+                                                        boxShadow: '0 0 5px rgba(30, 215, 96, 0.4)'
+                                                    }}
+                                                >
+                                                    Spotify
+                                                </a>
+                                            )}
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
