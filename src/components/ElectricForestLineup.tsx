@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { artists as allArtists } from '../data/artists';
+import MusicServiceButtons from './MusicServiceButtons';
 
 const ElectricForestLineup: React.FC = () => {
     useRef<HTMLTextAreaElement>(null);
@@ -341,47 +342,10 @@ const ElectricForestLineup: React.FC = () => {
                                         {artist.day || "TBA"}
                                     </td>
                                     <td style={{ padding: '10px' }}>
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            {artist.youtubeId && (
-                                                <a
-                                                    href={`https://music.youtube.com/channel/${artist.youtubeId}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        padding: '5px 15px',
-                                                        borderRadius: '20px',
-                                                        fontSize: '0.85rem',
-                                                        backgroundColor: 'rgba(255, 0, 0, 0.7)',
-                                                        color: 'white',
-                                                        textDecoration: 'none',
-                                                        boxShadow: '0 0 5px rgba(255, 0, 0, 0.4)'
-                                                    }}
-                                                >
-                                                    YouTube Music
-                                                </a>
-                                            )}
-                                            
-                                            {artist.spotifyId && (
-                                                <a
-                                                    href={`https://open.spotify.com/artist/${artist.spotifyId}`}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    style={{
-                                                        display: 'inline-block',
-                                                        padding: '5px 15px',
-                                                        borderRadius: '20px',
-                                                        fontSize: '0.85rem',
-                                                        backgroundColor: 'rgba(30, 215, 96, 0.7)',
-                                                        color: 'white',
-                                                        textDecoration: 'none',
-                                                        boxShadow: '0 0 5px rgba(30, 215, 96, 0.4)'
-                                                    }}
-                                                >
-                                                    Spotify
-                                                </a>
-                                            )}
-                                        </div>
+                                        <MusicServiceButtons
+                                            spotifyId={artist.spotifyId}
+                                            youtubeId={artist.youtubeId}
+                                        />
                                     </td>
                                 </tr>
                             ))}
