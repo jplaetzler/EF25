@@ -6,11 +6,11 @@ import { ArtistData } from '../types/lineup-types';
  * It's maintained separately from the application code for easier management.
  */
 export const artists: ArtistData[] = [
-  { name: "Justice", category: "Headliner", day: "Thursday", spotifyId: "1gR0gsQYfi6joyO1dlp76N", youtubeId: "UC2SIL1z4NUXVUwaZcOn1bVw" },
+  { name: "Justice", category: "Headliner", day: "Thursday", spotifyId: "1gR0gsQYfi6joyO1dlp76N", youtubeId: "UCcJLC91v0A0iD-CMUWdZkig" },
   { name: "Liquid Stranger", category: "Headliner", day: "Thursday", spotifyId: "4YJsSCuag8W1TFTgSeEc2k", youtubeId: "UClAq9y97qC8hIcqlmaeOnXg" },
   { name: "Sara Landry", category: "Headliner", day: "Thursday", spotifyId: "7eILArMiTFTQf8SEh5fFHK", youtubeId: "UC4c7e7nx3A50HCXwcVG-9VQ" },
   { name: "Vintage Culture", category: "Headliner", day: "Thursday", spotifyId: "28uJnu5EsrGml2tBd7y8ts", youtubeId: "UCRVMvpoep-Idv2QiKnAkTjg" },
-  { name: "Tiësto", category: "Headliner", day: "Friday", spotifyId: "2o5jDhtHVPhrJdv3cEQ99Z", youtubeId: "UCIYCcZgCQ5CEfY4IXGfC1Ww" },
+  { name: "Tiësto", category: "Headliner", day: "Friday", spotifyId: "2o5jDhtHVPhrJdv3cEQ99Z", youtubeId: "UC8VSaPhuiHkjobAgNpRqLIA" },
   { name: "Louis The Child", category: "Headliner", day: "Friday", spotifyId: "7wg1qvie3KqDNQbAkTdbX0", youtubeId: "UCWerwF0q4QKlKL37Yod4aSw" },
   { name: "Cloonee", category: "Headliner", day: "Friday", spotifyId: "7MdlXmq2HViAJWo9cf30sR", youtubeId: "UCzNHC-WyPQKiGkEk6flqq8g" },
   { name: "Zeds Dead", category: "Headliner", day: "Saturday", spotifyId: "67qogtRNI0GjUr8PlaG6Zh", youtubeId: "UCzXwsCed4N8BwLou75yxHlg" },
@@ -18,8 +18,9 @@ export const artists: ArtistData[] = [
   { name: "Barry Can't Swim", category: "Headliner", day: "Saturday", spotifyId: "0vTVU0KH0CVzijsoKGsTPl", youtubeId: "UCoIevyBHb_rq-bf16vbnd5A" },
   { name: "Fisher", category: "Headliner", day: "Sunday", spotifyId: "1VJ0briNOlXRtJUAzoUJdt", youtubeId: "UCGk4JI4WxzHAubPFBiF16qQ" },
   { name: "Khruangbin", category: "Headliner", day: "Sunday", spotifyId: "2mVVjNmdjXZZDvhgQWiakk", youtubeId: "UCW2SLxltqPa553qretr4KzQ" },
-  { name: "Of The Trees", category: "Headliner", day: "Sunday", spotifyId: "5V7NIXgCnX2KuQ01Bxg20c", youtubeId: "UCcMnjWiSu5KKuD6t3rW1QwA" },
-  { name: "Mochakk", category: "Headliner", day: "Sunday", spotifyId: "0rTh1tAdrEbdKZBTiiAQSo", youtubeId: "UCsujoYVwvARUAiAgSLwiIIw" },
+  { name: "Of The Trees", category: "Headliner", day: "Sunday", spotifyId: "5V7NIXgCnX2KuQ01Bxg20c", youtubeId: "UCbHHkvAgRiUmiXnWsJSvg7g" },
+
+  { name: "Mochakk", category: "Headliner", day: "Sunday", spotifyId: "0rTh1tAdrEbdKZBTiiAQSo", youtubeId: "UCzfOsmLrkz_UoRJS-JiyoBw" },
   { name: "The String Cheese Incident", category: "Headliner", day: "Special", spotifyId: "7N3JfLDzzjXdPbsyco7X0l", youtubeId: "UCelBX-BUIQ5Ae_GZewlmieA" },
   { name: "Arc De Soleil", category: "Featured Artists", day: "", spotifyId: "2iLMJdaqsQ44X7MPRD7rR5", youtubeId: "UCAphZ7fz2KNvr4RWsYsd0pg" },
   { name: "Avalon Emerson", category: "Featured Artists", day: "", spotifyId: "4yrO1N273PlTaixa4BNwBz", youtubeId: "UCEjnhP-qa-sSWZuoehdjHyg" },
