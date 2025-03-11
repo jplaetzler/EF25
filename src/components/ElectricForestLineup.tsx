@@ -1,17 +1,64 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { artists as allArtists } from '../data/artists';
 import MusicServiceButtons from './MusicServiceButtons';
+import {
+    saveToLocalStorage,
+    loadFromLocalStorage,
+    STORAGE_KEYS
+} from '../utils/localStorage';
 
 const ElectricForestLineup: React.FC = () => {
     useRef<HTMLTextAreaElement>(null);
-// State for artist selection and column preferences
-    const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>({});
-// State for filtering and sorting
-    const [filter, setFilter] = useState<string>("");
-    const [category, setCategory] = useState<string>("All");
-    const [day, setDay] = useState<string>("All");
-    const [sortBy, setSortBy] = useState<string>("category");
-    const [sortDirection, setSortDirection] = useState<string>("asc");
+
+    // Load initial state from localStorage or use defaults
+    const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, {})
+    );
+
+    const [filter, setFilter] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.FILTER, "")
+    );
+
+    const [category, setCategory] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.CATEGORY, "All")
+    );
+
+    const [day, setDay] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.DAY, "All")
+    );
+
+    const [sortBy, setSortBy] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.SORT_BY, "category")
+    );
+
+    const [sortDirection, setSortDirection] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.SORT_DIRECTION, "asc")
+    );
+
+    // Save state to localStorage whenever it changes
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, selectedArtists);
+    }, [selectedArtists]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.FILTER, filter);
+    }, [filter]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.CATEGORY, category);
+    }, [category]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.DAY, day);
+    }, [day]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.SORT_BY, sortBy);
+    }, [sortBy]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.SORT_DIRECTION, sortDirection);
+    }, [sortDirection]);
 
     // Filter artists based on current filters
     const filteredArtists = allArtists.filter(artist => {
@@ -84,6 +131,15 @@ const ElectricForestLineup: React.FC = () => {
 
     // Count selected artists
     const selectedCount = Object.values(selectedArtists).filter(Boolean).length;
+
+    // Function to reset all filters and selections
+    const resetAll = () => {
+        setFilter("");
+        setCategory("All");
+        setDay("All");
+        setSortBy("category");
+        setSortDirection("asc");
+    };
 
     return (
         <div className="min-h-screen"
@@ -159,7 +215,7 @@ const ElectricForestLineup: React.FC = () => {
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                outline: 'none'
+                                appearance: 'none'
                             }}
                         />
                     </div>
@@ -207,6 +263,27 @@ const ElectricForestLineup: React.FC = () => {
                         </select>
                     </div>
 
+                    {/* Reset button */}
+                    <div style={{ marginBottom: '10px' }}>
+                        <button
+                            onClick={resetAll}
+                            style={{
+                                width: '100%',
+                                padding: '10px',
+                                backgroundColor: 'rgba(138, 43, 226, 0.5)',
+                                border: '1px solid rgba(138, 43, 226, 0.8)',
+                                color: 'white',
+                                cursor: 'pointer',
+                                borderRadius: '4px',
+                                boxShadow: '0 0 5px rgba(138, 43, 226, 0.3)',
+                                transition: 'all 0.2s ease'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.7)'}
+                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.5)'}
+                        >
+                            Reset All Filters
+                        </button>
+                    </div>
                 </div>
 
                 {/* Artists section - Matching the screenshot layout */}
@@ -304,7 +381,7 @@ const ElectricForestLineup: React.FC = () => {
                                     <td style={{ padding: '10px' }}>
                                         <input
                                             type="checkbox"
-                                            checked={!!selectedArtists[artist.name]}
+                                            checked={selectedArtists[artist.name]}
                                             onChange={() => toggleArtistSelection(artist.name)}
                                         />
                                     </td>
@@ -323,17 +400,17 @@ const ElectricForestLineup: React.FC = () => {
                           borderRadius: '20px',
                           fontSize: '0.85rem',
                           textAlign: 'center',
-                          backgroundColor: artist.category === 'Headliner' 
-                            ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
-                            : artist.category === 'Featured Artists' 
-                              ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
-                              : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
+                          backgroundColor: artist.category === 'Headliner'
+                              ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
+                              : artist.category === 'Featured Artists'
+                                  ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
+                                  : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
                           color: 'white',
                           boxShadow: artist.category === 'Headliner'
-                            ? '0 0 8px rgba(128, 0, 128, 0.5)'
-                            : artist.category === 'Featured Artists'
-                              ? '0 0 6px rgba(147, 112, 219, 0.5)'
-                              : '0 0 5px rgba(186, 85, 211, 0.4)'
+                              ? '0 0 8px rgba(128, 0, 128, 0.5)'
+                              : artist.category === 'Featured Artists'
+                                  ? '0 0 6px rgba(147, 112, 219, 0.5)'
+                                  : '0 0 5px rgba(186, 85, 211, 0.4)'
                       }}>
                         {artist.category}
                       </span>
