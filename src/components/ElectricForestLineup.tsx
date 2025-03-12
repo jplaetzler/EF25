@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { artists as allArtists } from '../data/artists';
 import MusicServiceButtons from './MusicServiceButtons';
+import ExportSelectedArtists from './ExportSelectedArtists';
 import {
     saveToLocalStorage,
     loadFromLocalStorage,
@@ -286,6 +287,8 @@ const ElectricForestLineup: React.FC = () => {
                     </div>
                 </div>
 
+                <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists} />
+
                 {/* Artists section - Matching the screenshot layout */}
                 <div style={{ marginBottom: '20px' }}>
                     <div style={{
@@ -381,7 +384,7 @@ const ElectricForestLineup: React.FC = () => {
                                     <td style={{ padding: '10px' }}>
                                         <input
                                             type="checkbox"
-                                            checked={selectedArtists[artist.name]}
+                                            checked={!!selectedArtists[artist.name]}
                                             onChange={() => toggleArtistSelection(artist.name)}
                                         />
                                     </td>
