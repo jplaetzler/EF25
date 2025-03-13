@@ -83,7 +83,7 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
         <div style={{
             display: 'flex',
             gap: '10px',
-            marginBottom: '20px'
+            margin: '10px 2.5vw 20px 2.5vw'
         }}>
             <button
                 onClick={copyToClipboard}

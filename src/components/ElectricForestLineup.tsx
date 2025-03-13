@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { artists as allArtists } from '../data/artists';
+import React, {useState, useRef, useEffect} from 'react';
+import {artists as allArtists} from '../data/artists';
 import MusicServiceButtons from './MusicServiceButtons';
 import ExportSelectedArtists from './ExportSelectedArtists';
 import {
@@ -152,7 +152,8 @@ const ElectricForestLineup: React.FC = () => {
              radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%)
            `,
                  color: 'white',
-                 position: 'relative'
+                 position: 'relative',
+                 minWidth: '570px'
              }}>
 
             {/* Firefly effect elements */}
@@ -176,9 +177,9 @@ const ElectricForestLineup: React.FC = () => {
             ))}
 
             {/* Main content */}
-            <div style={{ position: 'relative', zIndex: 2, maxWidth: '1200px', margin: '0 auto', padding: '20px' }}>
+            <div style={{zIndex: 2, minWidth: '570px',maxWidth: '100%'}}>
                 {/* Header */}
-                <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                <div style={{textAlign: 'center', marginBottom: '20px'}}>
                     <h1 style={{
                         color: '#00FF80',
                         fontSize: '2.5rem',
@@ -187,7 +188,7 @@ const ElectricForestLineup: React.FC = () => {
                     }}>
                         ELECTRIC FOREST
                     </h1>
-                    <p style={{ color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)' }}>
+                    <p style={{color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'}}>
                         JUNE 19-22, 2025 • ROTHBURY, MI
                     </p>
                     <p style={{
@@ -201,8 +202,8 @@ const ElectricForestLineup: React.FC = () => {
                 </div>
 
                 {/* Controls section - Laid out exactly as in screenshot */}
-                <div style={{ marginBottom: '20px' }}>
-                    <div style={{ marginBottom: '10px' }}>
+                <div style={{marginBottom: '20px'}}>
+                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
                         <div>Search Artists</div>
                         <input
                             type="text"
@@ -210,30 +211,32 @@ const ElectricForestLineup: React.FC = () => {
                             onChange={(e) => setFilter(e.target.value)}
                             placeholder="Type artist name..."
                             style={{
-                                width: '100%',
+                                width: '93.5vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none'
+                                appearance: 'none',
+                                minWidth: '570px',
                             }}
                         />
                     </div>
 
-                    <div style={{ marginBottom: '10px' }}>
+                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
                         <div>Filter by Day</div>
                         <select
                             value={day}
                             onChange={(e) => setDay(e.target.value)}
                             style={{
-                                width: '100%',
+                                width: '95vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none'
+                                appearance: 'none',
+                                minWidth: '570px',
                             }}
                         >
                             {days.map(d => (
@@ -242,19 +245,20 @@ const ElectricForestLineup: React.FC = () => {
                         </select>
                     </div>
 
-                    <div style={{ marginBottom: '10px' }}>
+                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
                         <div>Filter by Category</div>
                         <select
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             style={{
-                                width: '100%',
+                                width: '95vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none'
+                                appearance: 'none',
+                                minWidth: '570px'
                             }}
                         >
                             <option value="All">All</option>
@@ -265,11 +269,11 @@ const ElectricForestLineup: React.FC = () => {
                     </div>
 
                     {/* Reset button */}
-                    <div style={{ marginBottom: '10px' }}>
+                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
                         <button
                             onClick={resetAll}
                             style={{
-                                width: '100%',
+                                width: '95vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(138, 43, 226, 0.5)',
                                 border: '1px solid rgba(138, 43, 226, 0.8)',
@@ -277,7 +281,8 @@ const ElectricForestLineup: React.FC = () => {
                                 cursor: 'pointer',
                                 borderRadius: '4px',
                                 boxShadow: '0 0 5px rgba(138, 43, 226, 0.3)',
-                                transition: 'all 0.2s ease'
+                                transition: 'all 0.2s ease',
+                                minWidth: '570px',
                             }}
                             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.7)'}
                             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.5)'}
@@ -287,10 +292,10 @@ const ElectricForestLineup: React.FC = () => {
                     </div>
                 </div>
 
-                <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists} />
+                <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists}/>
 
                 {/* Artists section - Matching the screenshot layout */}
-                <div style={{ marginBottom: '20px' }}>
+                <div style={{minWidth: '570px', width: '95vw', margin: '10px 2.5vw 20px 2.5vw'}}>
                     <div style={{
                         display: 'flex',
                         justifyContent: 'space-between',
@@ -305,9 +310,9 @@ const ElectricForestLineup: React.FC = () => {
                         backgroundColor: 'rgba(0, 0, 0, 0.4)',
                         boxShadow: '0 0 10px rgba(0, 255, 128, 0.15)'
                     }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                        <table style={{width: '100%', borderCollapse: 'collapse'}}>
                             <thead>
-                            <tr style={{ borderBottom: '1px solid rgba(0, 255, 128, 0.3)' }}>
+                            <tr style={{borderBottom: '1px solid rgba(0, 255, 128, 0.3)'}}>
                                 <th style={{
                                     padding: '10px',
                                     textAlign: 'left',
@@ -381,7 +386,7 @@ const ElectricForestLineup: React.FC = () => {
                                         backgroundColor: idx % 2 === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.5)',
                                         borderBottom: '1px solid rgba(0, 255, 128, 0.1)'
                                     }}>
-                                    <td style={{ padding: '10px' }}>
+                                    <td style={{padding: '10px'}}>
                                         <input
                                             type="checkbox"
                                             checked={!!selectedArtists[artist.name]}
@@ -396,32 +401,32 @@ const ElectricForestLineup: React.FC = () => {
                                     }}>
                                         {artist.name}
                                     </td>
-                                    <td style={{ padding: '10px' }}>
-                      <span style={{
-                          display: 'inline-block',
-                          padding: '5px 15px',
-                          borderRadius: '20px',
-                          fontSize: '0.85rem',
-                          textAlign: 'center',
-                          backgroundColor: artist.category === 'Headliner'
-                              ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
-                              : artist.category === 'Featured Artists'
-                                  ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
-                                  : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
-                          color: 'white',
-                          boxShadow: artist.category === 'Headliner'
-                              ? '0 0 8px rgba(128, 0, 128, 0.5)'
-                              : artist.category === 'Featured Artists'
-                                  ? '0 0 6px rgba(147, 112, 219, 0.5)'
-                                  : '0 0 5px rgba(186, 85, 211, 0.4)'
-                      }}>
-                        {artist.category}
-                      </span>
+                                    <td style={{padding: '10px'}}>
+                                        <span style={{
+                                            display: 'inline-block',
+                                            padding: '5px 15px',
+                                            borderRadius: '20px',
+                                            fontSize: '0.85rem',
+                                            textAlign: 'center',
+                                            backgroundColor: artist.category === 'Headliner'
+                                                ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
+                                                : artist.category === 'Featured Artists'
+                                                    ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
+                                                    : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
+                                            color: 'white',
+                                            boxShadow: artist.category === 'Headliner'
+                                                ? '0 0 8px rgba(128, 0, 128, 0.5)'
+                                                : artist.category === 'Featured Artists'
+                                                    ? '0 0 6px rgba(147, 112, 219, 0.5)'
+                                                    : '0 0 5px rgba(186, 85, 211, 0.4)'
+                                        }}>
+                                            {artist.category}
+                                        </span>
                                     </td>
-                                    <td style={{ padding: '10px' }}>
+                                    <td style={{padding: '10px'}}>
                                         {artist.day || "TBA"}
                                     </td>
-                                    <td style={{ padding: '10px' }}>
+                                    <td style={{padding: '10px'}}>
                                         <MusicServiceButtons
                                             spotifyId={artist.spotifyId}
                                             youtubeId={artist.youtubeId}
