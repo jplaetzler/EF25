@@ -5,19 +5,33 @@ import ExportSelectedArtists from './ExportSelectedArtists';
 import {
     saveToLocalStorage,
     loadFromLocalStorage,
-    STORAGE_KEYS
+    STORAGE_KEYS, migrateSelectedArtists
 } from '../utils/localStorage';
+import SelectionTabs from "./selectionsTab.tsx";
 
 const ElectricForestLineup: React.FC = () => {
     useRef<HTMLTextAreaElement>(null);
 
     // Load initial state from localStorage or use defaults
-    const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>(() =>
-        loadFromLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, {})
-    );
+    const [selectedArtists, setSelectedArtists] = useState<Record<string, string>>(() => {
+        // First, try to migrate any existing data
+        const migratedData = migrateSelectedArtists();
+
+        // If migration returned data, use it
+        if (Object.keys(migratedData).length > 0) {
+            return migratedData;
+        }
+
+        // Otherwise, load from localStorage as normal
+        return loadFromLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, {});
+    });
 
     const [filter, setFilter] = useState<string>(() =>
         loadFromLocalStorage(STORAGE_KEYS.FILTER, "")
+    );
+
+    const [activeTab, setActiveTab] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.ACTIVE_TAB, "all")
     );
 
     const [category, setCategory] = useState<string>(() =>
@@ -40,6 +54,10 @@ const ElectricForestLineup: React.FC = () => {
     useEffect(() => {
         saveToLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, selectedArtists);
     }, [selectedArtists]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.ACTIVE_TAB, activeTab);
+    }, [activeTab]);
 
     useEffect(() => {
         saveToLocalStorage(STORAGE_KEYS.FILTER, filter);
@@ -108,30 +126,17 @@ const ElectricForestLineup: React.FC = () => {
     // Get unique days for filtering
     const days = ["All", ...Array.from(new Set(allArtists.map(artist => artist.day).filter(day => day !== "")))];
 
-    // Toggle selection of an artist
-    const toggleArtistSelection = (artistName: string): void => {
-        setSelectedArtists(prev => ({
-            ...prev,
-            [artistName]: !prev[artistName]
-        }));
-    };
-
-    // Select/deselect all visible artists
-    const toggleAllArtists = (): void => {
-        const someSelected = sortedArtists.some(artist => selectedArtists[artist.name]);
-        if (someSelected) {
-            setSelectedArtists({});
+    const tabFilteredArtists = sortedArtists.filter(artist => {
+        if (activeTab === "all") {
+            return true; // Show all artists
+        } else if (activeTab === "none") {
+            // Show artists that are not selected or have empty string value
+            return !selectedArtists[artist.name] || selectedArtists[artist.name] === "";
         } else {
-            const newSelected: Record<string, boolean> = {};
-            sortedArtists.forEach(artist => {
-                newSelected[artist.name] = true;
-            });
-            setSelectedArtists(newSelected);
+            // Show artists with specific selection status
+            return selectedArtists[artist.name] === activeTab;
         }
-    };
-
-    // Count selected artists
-    const selectedCount = Object.values(selectedArtists).filter(Boolean).length;
+    });
 
     // Function to reset all filters and selections
     const resetAll = () => {
@@ -142,18 +147,57 @@ const ElectricForestLineup: React.FC = () => {
         setSortDirection("asc");
     };
 
+    // Function to get background color for category badges
+    const getCategoryColor = (category: string) => {
+        switch (category) {
+            case 'Headliner':
+                return {
+                    bg: 'rgba(128, 0, 128, 0.7)',
+                    shadow: '0 0 8px rgba(128, 0, 128, 0.5)'
+                };
+            case 'Featured Artists':
+                return {
+                    bg: 'rgba(147, 112, 219, 0.7)',
+                    shadow: '0 0 6px rgba(147, 112, 219, 0.5)'
+                };
+            default: // Supporting Artists
+                return {
+                    bg: 'rgba(186, 85, 211, 0.6)',
+                    shadow: '0 0 5px rgba(186, 85, 211, 0.4)'
+                };
+        }
+    };
+
+    // Function to get text color and style for artist name based on category
+    const getArtistNameStyle = (category: string) => {
+        if (category === 'Headliner') {
+            return {
+                color: '#00FFFF',
+                fontWeight: 'bold',
+                textShadow: '0 0 5px rgba(0, 255, 255, 0.6)'
+            };
+        }
+        return {
+            color: 'white',
+            fontWeight: 'normal',
+            textShadow: 'none'
+        };
+    };
+
     return (
         <div className="min-h-screen"
              style={{
                  backgroundColor: '#071507',
                  backgroundImage: `
-             radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
-             radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
-             radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%)
-           `,
+         radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
+         radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
+         radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%)
+       `,
                  color: 'white',
                  position: 'relative',
-                 minWidth: '570px'
+                 width: '100%', // Use full width
+                 maxWidth: '100vw', // Never exceed viewport width
+                 overflowX: 'hidden' // Prevent horizontal scrolling
              }}>
 
             {/* Firefly effect elements */}
@@ -177,7 +221,13 @@ const ElectricForestLineup: React.FC = () => {
             ))}
 
             {/* Main content */}
-            <div style={{zIndex: 2, minWidth: '570px',maxWidth: '100%'}}>
+            <div style={{
+                zIndex: 2,
+                width: '100%', // Use full width
+                maxWidth: '1400px', // Cap maximum width for very large screens
+                margin: '0 auto', // Center content on large screens
+                padding: '0 15px' // Add some padding on the sides
+            }}>
                 {/* Header */}
                 <div style={{textAlign: 'center', marginBottom: '20px'}}>
                     <h1 style={{
@@ -201,7 +251,7 @@ const ElectricForestLineup: React.FC = () => {
                     </p>
                 </div>
 
-                {/* Controls section - Laid out exactly as in screenshot */}
+                {/* Controls section */}
                 <div style={{marginBottom: '20px'}}>
                     <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
                         <div>Search Artists</div>
@@ -211,14 +261,13 @@ const ElectricForestLineup: React.FC = () => {
                             onChange={(e) => setFilter(e.target.value)}
                             placeholder="Type artist name..."
                             style={{
-                                width: '93.5vw',
+                                width: '87.5vw', // Full width
                                 padding: '10px',
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
                                 appearance: 'none',
-                                minWidth: '570px',
                             }}
                         />
                     </div>
@@ -229,14 +278,13 @@ const ElectricForestLineup: React.FC = () => {
                             value={day}
                             onChange={(e) => setDay(e.target.value)}
                             style={{
-                                width: '95vw',
+                                width: '90vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
                                 appearance: 'none',
-                                minWidth: '570px',
                             }}
                         >
                             {days.map(d => (
@@ -251,14 +299,13 @@ const ElectricForestLineup: React.FC = () => {
                             value={category}
                             onChange={(e) => setCategory(e.target.value)}
                             style={{
-                                width: '95vw',
+                                width: '90vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
                                 appearance: 'none',
-                                minWidth: '570px'
                             }}
                         >
                             <option value="All">All</option>
@@ -268,12 +315,68 @@ const ElectricForestLineup: React.FC = () => {
                         </select>
                     </div>
 
+                    {/* Sort controls */}
+                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
+                        <div>Sort by</div>
+                        <div style={{
+                            display: 'flex',
+                            gap: '10px',
+                            width: '90vw'
+                        }}>
+                            <button
+                                onClick={() => handleSort("name")}
+                                style={{
+                                    flex: 1,
+                                    padding: '8px',
+                                    backgroundColor: sortBy === "name" ? 'rgba(0, 255, 128, 0.3)' : 'rgba(0, 0, 0, 0.5)',
+                                    border: '1px solid rgba(0, 255, 128, 0.3)',
+                                    color: '#00FF80',
+                                    cursor: 'pointer',
+                                    borderRadius: '4px',
+                                    textShadow: '0 0 5px rgba(0, 255, 128, 0.4)'
+                                }}
+                            >
+                                ARTIST {sortBy === "name" && (sortDirection === "asc" ? "↑" : "↓")}
+                            </button>
+                            <button
+                                onClick={() => handleSort("category")}
+                                style={{
+                                    flex: 1,
+                                    padding: '8px',
+                                    backgroundColor: sortBy === "category" ? 'rgba(138, 43, 226, 0.3)' : 'rgba(0, 0, 0, 0.5)',
+                                    border: '1px solid rgba(138, 43, 226, 0.3)',
+                                    color: '#8A2BE2',
+                                    cursor: 'pointer',
+                                    borderRadius: '4px',
+                                    textShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
+                                }}
+                            >
+                                CATEGORY {sortBy === "category" && (sortDirection === "asc" ? "↑" : "↓")}
+                            </button>
+                            <button
+                                onClick={() => handleSort("day")}
+                                style={{
+                                    flex: 1,
+                                    padding: '8px',
+                                    backgroundColor: sortBy === "day" ? 'rgba(0, 191, 255, 0.3)' : 'rgba(0, 0, 0, 0.5)',
+                                    border: '1px solid rgba(0, 191, 255, 0.3)',
+                                    color: '#00BFFF',
+                                    cursor: 'pointer',
+                                    borderRadius: '4px',
+                                    textShadow: '0 0 5px rgba(0, 191, 255, 0.4)'
+                                }}
+                            >
+                                DAY {sortBy === "day" && (sortDirection === "asc" ? "↑" : "↓")}
+                            </button>
+                        </div>
+                    </div>
+
                     {/* Reset button */}
                     <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
                         <button
                             onClick={resetAll}
                             style={{
-                                width: '95vw',
+                                width: '90vw',
                                 padding: '10px',
                                 backgroundColor: 'rgba(138, 43, 226, 0.5)',
                                 border: '1px solid rgba(138, 43, 226, 0.8)',
@@ -281,8 +384,7 @@ const ElectricForestLineup: React.FC = () => {
                                 cursor: 'pointer',
                                 borderRadius: '4px',
                                 boxShadow: '0 0 5px rgba(138, 43, 226, 0.3)',
-                                transition: 'all 0.2s ease',
-                                minWidth: '570px',
+                                transition: 'all 0.2s ease'
                             }}
                             onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.7)'}
                             onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.5)'}
@@ -292,160 +394,191 @@ const ElectricForestLineup: React.FC = () => {
                     </div>
                 </div>
 
-                <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists}/>
+                <SelectionTabs
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    selectedArtists={selectedArtists}
+                    filteredArtists={sortedArtists}
+                />
 
-                {/* Artists section - Matching the screenshot layout */}
-                <div style={{minWidth: '570px', width: '95vw', margin: '10px 2.5vw 20px 2.5vw'}}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '10px'
-                    }}>
-                        <div>Artists ({filteredArtists.length})</div>
-                        <div>Selected: {selectedCount}</div>
-                    </div>
+                {/* Artist Cards Container */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                    gap: '20px',
+                    paddingBottom: '20px',
+                    width: '90vw',
+                    margin: '10px 2.5vw 10px 2.5vw'
+                }}>
+                    {tabFilteredArtists.map((artist) => {
+                        const categoryStyle = getCategoryColor(artist.category);
+                        const nameStyle = getArtistNameStyle(artist.category);
 
-                    <div style={{
-                        border: '1px solid rgba(0, 255, 128, 0.3)',
-                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                        boxShadow: '0 0 10px rgba(0, 255, 128, 0.15)'
-                    }}>
-                        <table style={{width: '100%', borderCollapse: 'collapse'}}>
-                            <thead>
-                            <tr style={{borderBottom: '1px solid rgba(0, 255, 128, 0.3)'}}>
-                                <th style={{
-                                    padding: '10px',
-                                    textAlign: 'left',
-                                    width: '40px'
+                        return (
+                            <div key={artist.name} style={{
+                                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                borderRadius: '8px',
+                                padding: '16px',
+                                boxShadow: '0 0 10px rgba(0, 255, 128, 0.15)',
+                                border: '1px solid rgba(0, 255, 128, 0.2)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                minHeight: '160px',
+                                boxSizing: 'border-box' // Ensure padding is included in width calculation
+                            }}>
+                                {/* Top row with name and checkbox */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    marginBottom: '14px'
                                 }}>
-                                    <input
-                                        type="checkbox"
-                                        onChange={toggleAllArtists}
-                                        checked={sortedArtists.length > 0 && sortedArtists.every(artist => selectedArtists[artist.name])}
-                                    />
-                                </th>
-                                <th
-                                    onClick={() => handleSort("name")}
-                                    style={{
-                                        padding: '10px',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#00FF80',
-                                        textShadow: '0 0 5px rgba(0, 255, 128, 0.4)'
-                                    }}
-                                >
-                                    ARTIST
-                                    {sortBy === "name" && (
-                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
-                                    )}
-                                </th>
-                                <th
-                                    onClick={() => handleSort("category")}
-                                    style={{
-                                        padding: '10px',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#8A2BE2',
-                                        textShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
-                                    }}
-                                >
-                                    CATEGORY
-                                    {sortBy === "category" && (
-                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
-                                    )}
-                                </th>
-                                <th
-                                    onClick={() => handleSort("day")}
-                                    style={{
-                                        padding: '10px',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#00BFFF',
-                                        textShadow: '0 0 5px rgba(0, 191, 255, 0.4)'
-                                    }}
-                                >
-                                    DAY
-                                    {sortBy === "day" && (
-                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
-                                    )}
-                                </th>
-                                <th style={{
-                                    padding: '10px',
-                                    textAlign: 'left',
-                                    color: '#FFFF00',
-                                    textShadow: '0 0 5px rgba(255, 255, 0, 0.4)'
-                                }}>
-                                    LISTEN
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {sortedArtists.map((artist, idx) => (
-                                <tr key={artist.name}
-                                    style={{
-                                        backgroundColor: idx % 2 === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.5)',
-                                        borderBottom: '1px solid rgba(0, 255, 128, 0.1)'
-                                    }}>
-                                    <td style={{padding: '10px'}}>
-                                        <input
-                                            type="checkbox"
-                                            checked={!!selectedArtists[artist.name]}
-                                            onChange={() => toggleArtistSelection(artist.name)}
-                                        />
-                                    </td>
-                                    <td style={{
-                                        padding: '10px',
-                                        color: artist.category === 'Headliner' ? '#00FFFF' : 'white',
-                                        fontWeight: artist.category === 'Headliner' ? 'bold' : 'normal',
-                                        textShadow: artist.category === 'Headliner' ? '0 0 5px rgba(0, 255, 255, 0.6)' : 'none'
+                                    <h3 style={{
+                                        margin: '0',
+                                        fontSize: '1.2rem',
+                                        maxWidth: 'calc(100% - 30px)',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        ...nameStyle
                                     }}>
                                         {artist.name}
-                                    </td>
-                                    <td style={{padding: '10px'}}>
+                                    </h3>
+
+                                    {/* dropdown */}
+                                    <select
+                                        value={selectedArtists[artist.name] || "none"}
+                                        onChange={(e) => {
+                                            const newValue = e.target.value;
+                                            setSelectedArtists(prev => ({
+                                                ...prev,
+                                                [artist.name]: newValue === "none" ? "" : newValue
+                                            }));
+                                        }}
+                                        style={{
+                                            padding: '6px',
+                                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                                            border: '1px solid rgba(0, 255, 128, 0.3)',
+                                            borderRadius: '4px',
+                                            color: 'white',
+                                            cursor: 'pointer',
+                                            flexShrink: 0,
+                                            marginLeft: '10px',
+                                            boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
+                                            WebkitAppearance: 'none',
+                                            MozAppearance: 'none',
+                                            appearance: 'none',
+                                            backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300FF80%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
+                                            backgroundRepeat: 'no-repeat',
+                                            backgroundPosition: 'right 0.7rem top 50%',
+                                            backgroundSize: '0.65rem auto',
+                                            paddingRight: '1.5rem'
+                                        }}
+                                    >
+                                        <option value="none" style={{color: '#cccccc'}}>Hidden Grove</option>
+                                        <option value="electric-magic" style={{color: '#00FFFF'}}>Electric Magic</option>
+                                        <option value="forest-whisper" style={{color: '#00FF80'}}>Forest Whisper</option>
+                                        <option value="passing-breeze" style={{color: '#8A2BE2'}}>Passing Breeze</option>
+                                    </select>
+                                </div>
+
+                                {/* Bottom content row */}
+                                <div style={{
+                                    display: 'flex',
+                                    width: '100%',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    gap: '16px' // Space between columns
+                                }}>
+                                    {/* Left column - Category and day info */}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '10px',
+                                        flex: '1 1 auto',
+                                        minWidth: '0',
+                                        maxWidth: '60%'
+                                    }}>
+                                        {/* Category badge */}
                                         <span style={{
                                             display: 'inline-block',
                                             padding: '5px 15px',
                                             borderRadius: '20px',
                                             fontSize: '0.85rem',
                                             textAlign: 'center',
-                                            backgroundColor: artist.category === 'Headliner'
-                                                ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
-                                                : artist.category === 'Featured Artists'
-                                                    ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
-                                                    : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
+                                            backgroundColor: categoryStyle.bg,
                                             color: 'white',
-                                            boxShadow: artist.category === 'Headliner'
-                                                ? '0 0 8px rgba(128, 0, 128, 0.5)'
-                                                : artist.category === 'Featured Artists'
-                                                    ? '0 0 6px rgba(147, 112, 219, 0.5)'
-                                                    : '0 0 5px rgba(186, 85, 211, 0.4)'
+                                            boxShadow: categoryStyle.shadow,
+                                            alignSelf: 'flex-start',
+                                            maxWidth: '100%',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
                                         }}>
-                                            {artist.category}
-                                        </span>
-                                    </td>
-                                    <td style={{padding: '10px'}}>
-                                        {artist.day || "TBA"}
-                                    </td>
-                                    <td style={{padding: '10px'}}>
+                            {artist.category}
+                        </span>
+
+                                        {/* Day information */}
+                                        {artist.day && (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '5px'
+                                            }}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z"
+                                                          stroke="#00BFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                                <span style={{color: '#00BFFF'}}>{artist.day || "TBA"}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Right column - Music service buttons */}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '10px',
+                                        width: '100px', // Fixed width
+                                        flexShrink: 0, // Don't shrink
+                                        boxSizing: 'border-box'
+                                    }}>
                                         <MusicServiceButtons
                                             spotifyId={artist.spotifyId}
                                             youtubeId={artist.youtubeId}
                                         />
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </div>
+                                </div>
+
+                                {/* Hover glow effect */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    pointerEvents: 'none',
+                                    borderRadius: '8px',
+                                    transition: 'box-shadow 0.3s ease',
+                                    boxShadow: 'inset 0 0 0 rgba(0, 255, 128, 0)'
+                                }} className="card-glow"></div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Animations */}
+            <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists}/>
+            {/* Animations and styles */}
             <style>{`
                 @keyframes firefly {
                     0% { opacity: 0; }
                     50% { opacity: 0.8; }
                     100% { opacity: 0; }
+                }
+                
+                /* Card hover effect */
+                div:hover > .card-glow {
+                    box-shadow: inset 0 0 20px rgba(0, 255, 128, 0.3) !important;
                 }
             `}</style>
         </div>
