@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArtistData } from '../types/lineup-types';
 
 interface ExportSelectedArtistsProps {
@@ -7,11 +7,25 @@ interface ExportSelectedArtistsProps {
 }
 
 const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
-                                                                         selectedArtists,
-                                                                         allArtists
-                                                                     }) => {
+    selectedArtists,
+    allArtists
+}) => {
     // State for export dropdown
     const [exportMode, setExportMode] = useState<string>("all");
+    
+    // State to track the temporary download URL and modal state
+    const [downloadUrl, setDownloadUrl] = useState<string>("");
+    const [showMobileExport, setShowMobileExport] = useState<boolean>(false);
+    const [fileName, setFileName] = useState<string>("");
+    
+    // Cleanup the blob URL when component unmounts or URL changes
+    useEffect(() => {
+        return () => {
+            if (downloadUrl) {
+                URL.revokeObjectURL(downloadUrl);
+            }
+        };
+    }, [downloadUrl]);
 
     // Get the list of artists data based on the export mode
     const getArtistsDataForExport = (): ArtistData[] => {
@@ -57,6 +71,49 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
             .catch(err => {
                 console.error('Failed to copy text: ', err);
                 alert('Failed to copy to clipboard. Please try again.');
+            });
+    };
+
+    // Function to detect mobile devices
+    const isMobileDevice = () => {
+        return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    };
+
+    // Close the mobile export modal
+    const closeMobileExport = () => {
+        setShowMobileExport(false);
+        // Cleanup the URL
+        if (downloadUrl) {
+            URL.revokeObjectURL(downloadUrl);
+            setDownloadUrl("");
+        }
+    };
+    
+    // Open the CSV in a new browser tab for mobile devices
+    const openCsvInNewTab = () => {
+        if (!downloadUrl) return;
+        
+        // For iOS/Safari, open in a new tab
+        window.open(downloadUrl, '_blank');
+        
+        // Close the modal after opening
+        setTimeout(() => {
+            closeMobileExport();
+        }, 500);
+    };
+    
+    // Copy the CSV link to clipboard
+    const copyCSVLink = () => {
+        if (!downloadUrl) return;
+        
+        navigator.clipboard.writeText(downloadUrl)
+            .then(() => {
+                alert('Download link copied to clipboard!');
+                closeMobileExport();
+            })
+            .catch(err => {
+                console.error('Failed to copy link: ', err);
+                alert('Failed to copy link. Please try again.');
             });
     };
 
@@ -114,15 +171,29 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
         // Create a blob and download link
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
+        const fullFileName = `${fileNamePrefix}_artists.csv`;
 
-        // Set up and trigger download
-        link.setAttribute('href', url);
-        link.setAttribute('download', `${fileNamePrefix}_artists.csv`);
-        link.style.display = 'none';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // Check if it's a mobile device
+        if (isMobileDevice()) {
+            // For mobile: set state for modal display
+            setDownloadUrl(url);
+            setFileName(fullFileName);
+            setShowMobileExport(true);
+        } else {
+            // For desktop: standard download approach
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', fullFileName);
+            link.style.display = 'none';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            // Cleanup URL after download
+            setTimeout(() => {
+                URL.revokeObjectURL(url);
+            }, 100);
+        }
     };
 
     // Count artists by category
@@ -159,7 +230,8 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
             display: 'flex',
             flexDirection: 'column',
             gap: '10px',
-            margin: '10px 2.5vw 15px 2.5vw'
+            margin: '10px 2.5vw 15px 2.5vw',
+            position: 'relative'
         }}>
             <div style={{
                 display: 'flex',
@@ -265,6 +337,133 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
                     Download CSV
                 </button>
             </div>
+
+            {/* Mobile Export Modal */}
+            {showMobileExport && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    height: '100%',
+                    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    zIndex: 1000,
+                }}>
+                    <div style={{
+                        backgroundColor: 'rgba(10, 30, 10, 0.95)',
+                        borderRadius: '8px',
+                        padding: '20px',
+                        width: '90%',
+                        maxWidth: '400px',
+                        boxShadow: '0 0 20px rgba(0, 255, 128, 0.3), 0 0 40px rgba(138, 43, 226, 0.2)',
+                        border: '1px solid rgba(0, 255, 128, 0.5)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '15px',
+                    }}>
+                        <div style={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                        }}>
+                            <h3 style={{
+                                color: '#00FFFF',
+                                margin: 0,
+                                textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+                            }}>Download CSV</h3>
+                            <button 
+                                onClick={closeMobileExport}
+                                style={{
+                                    backgroundColor: 'transparent',
+                                    border: 'none',
+                                    color: 'white',
+                                    fontSize: '1.2rem',
+                                    cursor: 'pointer',
+                                    padding: '5px',
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                        
+                        <p style={{
+                            color: 'white',
+                            margin: '5px 0 15px 0',
+                            fontSize: '0.9rem',
+                        }}>
+                            On mobile devices, you have a few options to download the CSV file <strong>{fileName}</strong>:
+                        </p>
+
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                        }}>
+                            <button
+                                onClick={openCsvInNewTab}
+                                style={{
+                                    padding: '12px 15px',
+                                    backgroundColor: 'rgba(0, 255, 255, 0.2)',
+                                    border: '1px solid rgba(0, 255, 255, 0.6)',
+                                    borderRadius: '6px',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    fontSize: '0.95rem',
+                                    boxShadow: '0 0 8px rgba(0, 255, 255, 0.2)'
+                                }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 10V16M12 16L9 13M12 16L15 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M7 4V3C7 2.46957 7.21071 1.96086 7.58579 1.58579C7.96086 1.21071 8.46957 1 9 1H15C15.5304 1 16.0391 1.21071 16.4142 1.58579C16.7893 1.96086 17 2.46957 17 3V4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M12 10V16M12 16L9 13M12 16L15 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M20 7V18C20 19.1046 19.1046 20 18 20H6C4.89543 20 4 19.1046 4 18V7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Open CSV in Browser
+                            </button>
+
+                            <button
+                                onClick={copyCSVLink}
+                                style={{
+                                    padding: '12px 15px',
+                                    backgroundColor: 'rgba(138, 43, 226, 0.2)',
+                                    border: '1px solid rgba(138, 43, 226, 0.6)',
+                                    borderRadius: '6px',
+                                    color: 'white',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    gap: '10px',
+                                    fontSize: '0.95rem',
+                                    boxShadow: '0 0 8px rgba(138, 43, 226, 0.2)'
+                                }}
+                            >
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M16 4H18C18.5304 4 19.0391 4.21071 19.4142 4.58579C19.7893 4.96086 20 5.46957 20 6V20C20 20.5304 19.7893 21.0391 19.4142 21.4142C19.0391 21.7893 18.5304 22 18 22H6C5.46957 22 4.96086 21.7893 4.58579 21.4142C4.21071 21.0391 4 20.5304 4 20V6C4 5.46957 4.21071 4.96086 4.58579 4.58579C4.96086 4.21071 5.46957 4 6 4H8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <path d="M15 2H9C8.44772 2 8 2.44772 8 3V5C8 5.55228 8.44772 6 9 6H15C15.5523 6 16 5.55228 16 5V3C16 2.44772 15.5523 2 15 2Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                                Copy CSV Link
+                            </button>
+                        </div>
+
+                        <p style={{
+                            color: '#999',
+                            margin: '5px 0 0 0',
+                            fontSize: '0.8rem',
+                            textAlign: 'center'
+                        }}>
+                            After opening in browser, you can save the file to your device
+                        </p>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

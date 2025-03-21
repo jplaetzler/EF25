@@ -148,6 +148,67 @@ const ElectricForestLineup: React.FC = () => {
         setSortDirection("asc");
     };
 
+    // Helper functions for dropdown styling to match tabs
+    const getTabColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return '#00FFFF';
+            case 'forest-whisper':
+                return '#00FF80';
+            case 'passing-breeze':
+                return '#8A2BE2';
+            case 'none':
+                return '#cccccc';
+            default:
+                return 'white';
+        }
+    };
+
+    const getTabBgColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 30, 60, 0.5))`;
+            case 'forest-whisper':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 40, 20, 0.5))`;
+            case 'passing-breeze':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 0, 50, 0.5))`;
+            case 'none':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 30, 30, 0.5))`;
+            default:
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 30, 30, 0.5))`;
+        }
+    };
+
+    const getTabBorderColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return 'rgba(0, 255, 255, 0.3)';
+            case 'forest-whisper':
+                return 'rgba(0, 255, 128, 0.3)';
+            case 'passing-breeze':
+                return 'rgba(138, 43, 226, 0.3)';
+            case 'none':
+                return 'rgba(204, 204, 204, 0.3)';
+            default:
+                return 'rgba(255, 255, 255, 0.3)';
+        }
+    };
+
+    const getTabShadowColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return 'rgba(0, 255, 255, 0.2)';
+            case 'forest-whisper':
+                return 'rgba(0, 255, 128, 0.2)';
+            case 'passing-breeze':
+                return 'rgba(138, 43, 226, 0.2)';
+            case 'none':
+                return 'rgba(204, 204, 204, 0.2)';
+            default:
+                return 'rgba(255, 255, 255, 0.2)';
+        }
+    };
+
     // Function to get background color for category badges
     const getCategoryColor = (category: string) => {
         switch (category) {
@@ -278,23 +339,22 @@ const ElectricForestLineup: React.FC = () => {
                 </div>
 
                 {/* Layout container for integrated search and filter */}
-                <div style={{margin: '10px 2.5vw'}}>
+                <div style={{margin: '10px auto', width: '95%', maxWidth: '1200px'}}>
                     {/* Combined Search Bar with Filter Button */}
                     <div style={{
                         position: 'relative',
                         marginBottom: '15px',
-                        width: '95%',
-                        maxWidth: '1200px',
-                        margin: '0 auto',
+                        width: '100%',
                     }}>
                         <div style={{
                             position: 'absolute',
-                            left: '10px',
+                            left: '20px',
                             top: '50%',
                             transform: 'translateY(-50%)',
-                            color: 'rgba(255, 255, 255, 0.6)',
+                            color: 'rgba(0, 255, 128, 0.6)',
                             zIndex: 1,
                             pointerEvents: 'none',
+                            textShadow: '0 0 3px rgba(0, 255, 128, 0.3)',
                         }}>
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" 
@@ -309,35 +369,35 @@ const ElectricForestLineup: React.FC = () => {
                             style={{
                                 width: '100%',
                                 padding: '10px 45px 10px 35px', // Add padding for icon and filter button
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 40, 20, 0.5))',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
                                 appearance: 'none',
-                                borderRadius: '4px',
+                                borderRadius: '6px 18px 6px 18px',
+                                clipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                WebkitClipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
                                 boxSizing: 'border-box',
                                 fontSize: '0.95rem',
+                                textShadow: '0 0 3px rgba(0, 255, 128, 0.2)',
                             }}
                         />
                         {/* Filter Button positioned inside search input */}
                         <div style={{
                             position: 'absolute',
-                            right: '7px',
+                            right: '20px',
                             top: '50%',
                             transform: 'translateY(-50%)',
                             zIndex: 1,
                         }}>
                             <FilterSortPanel
-                                filter={filter}
-                                setFilter={setFilter}
                                 day={day}
                                 setDay={setDay}
                                 category={category}
                                 setCategory={setCategory}
                                 sortBy={sortBy}
-                                setSortBy={setSortBy}
                                 sortDirection={sortDirection}
-                                setSortDirection={setSortDirection}
                                 handleSort={handleSort}
                                 resetAll={resetAll}
                                 days={days}
@@ -396,41 +456,60 @@ const ElectricForestLineup: React.FC = () => {
                                         {artist.name}
                                     </h3>
 
-                                    {/* dropdown */}
-                                    <select
-                                        value={selectedArtists[artist.name] || "none"}
-                                        onChange={(e) => {
-                                            const newValue = e.target.value;
-                                            setSelectedArtists(prev => ({
-                                                ...prev,
-                                                [artist.name]: newValue === "none" ? "" : newValue
-                                            }));
-                                        }}
+                                    {/* Custom dropdown */}
+                                    <div
                                         style={{
-                                            padding: '6px',
-                                            backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                                            border: '1px solid rgba(0, 255, 128, 0.3)',
-                                            borderRadius: '4px',
-                                            color: 'white',
-                                            cursor: 'pointer',
+                                            position: 'relative',
                                             flexShrink: 0,
                                             marginLeft: '10px',
-                                            boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                            WebkitAppearance: 'none',
-                                            MozAppearance: 'none',
-                                            appearance: 'none',
-                                            backgroundImage: `url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%2300FF80%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E")`,
-                                            backgroundRepeat: 'no-repeat',
-                                            backgroundPosition: 'right 0.7rem top 50%',
-                                            backgroundSize: '0.65rem auto',
-                                            paddingRight: '1.5rem'
+                                            width: '150px',
                                         }}
                                     >
-                                        <option value="none" style={{color: '#cccccc'}}>Hidden Grove?</option>
-                                        <option value="electric-magic" style={{color: '#00FFFF'}}>Electric Magic</option>
-                                        <option value="forest-whisper" style={{color: '#00FF80'}}>Forest Whisper</option>
-                                        <option value="passing-breeze" style={{color: '#8A2BE2'}}>Passing Breeze</option>
-                                    </select>
+                                        <select
+                                            value={selectedArtists[artist.name] || "none"}
+                                            onChange={(e) => {
+                                                const newValue = e.target.value;
+                                                setSelectedArtists(prev => ({
+                                                    ...prev,
+                                                    [artist.name]: newValue === "none" ? "" : newValue
+                                                }));
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '6px 30px 6px 12px',
+                                                backgroundColor: getTabBgColor(selectedArtists[artist.name] || 'none'),
+                                                border: `1px solid ${getTabBorderColor(selectedArtists[artist.name] || 'none')}`,
+                                                color: getTabColor(selectedArtists[artist.name] || 'none'),
+                                                cursor: 'pointer',
+                                                boxShadow: `0 0 5px ${getTabShadowColor(selectedArtists[artist.name] || 'none')}`,
+                                                WebkitAppearance: 'none',
+                                                MozAppearance: 'none',
+                                                appearance: 'none',
+                                                borderRadius: '6px 18px 6px 18px',
+                                                textShadow: `0 0 3px ${getTabShadowColor(selectedArtists[artist.name] || 'none')}`,
+                                                clipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                                WebkitClipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                                fontSize: '0.85rem',
+                                            }}
+                                        >
+                                            <option value="none">🦉 Hidden Grove</option>
+                                            <option value="electric-magic">⚡ Electric Magic</option>
+                                            <option value="forest-whisper">🌳 Forest Whisper</option>
+                                            <option value="passing-breeze">🍂 Passing Breeze</option>
+                                        </select>
+                                        <div style={{
+                                            position: 'absolute',
+                                            right: '10px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            pointerEvents: 'none',
+                                            fontSize: '0.85rem',
+                                            color: getTabColor(selectedArtists[artist.name] || 'none'),
+                                            textShadow: `0 0 3px ${getTabShadowColor(selectedArtists[artist.name] || 'none')}`,
+                                        }}>
+                                            <span>↓</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {/* Bottom content row */}

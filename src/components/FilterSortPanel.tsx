@@ -1,32 +1,24 @@
 import React, { useState } from 'react';
 
 interface FilterSortPanelProps {
-  filter: string;
-  setFilter: (filter: string) => void;
   day: string;
   setDay: (day: string) => void;
   category: string;
   setCategory: (category: string) => void;
   sortBy: string;
-  setSortBy: (sortBy: string) => void;
   sortDirection: string;
-  setSortDirection: (sortDirection: string) => void;
   handleSort: (column: string) => void;
   resetAll: () => void;
   days: string[];
 }
 
 const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
-  filter,
-  setFilter,
   day,
   setDay,
   category,
   setCategory,
   sortBy,
-  setSortBy,
   sortDirection,
-  setSortDirection,
   handleSort,
   resetAll,
   days,
@@ -109,7 +101,7 @@ const FilterSortPanel: React.FC<FilterSortPanelProps> = ({
           }}>
 
           <div style={{ padding: '15px' }}>
-            {/* Search is now moved to the main component */}
+            {/* Filter and Sort Controls */}
 
           {/* Day Filter */}
           <div style={{ margin: '10px 0' }}>
