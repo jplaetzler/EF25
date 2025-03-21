@@ -2,22 +2,37 @@ import React, {useState, useRef, useEffect} from 'react';
 import {artists as allArtists} from '../data/artists';
 import MusicServiceButtons from './MusicServiceButtons';
 import ExportSelectedArtists from './ExportSelectedArtists';
+import FilterSortPanel from './FilterSortPanel';
 import {
     saveToLocalStorage,
     loadFromLocalStorage,
-    STORAGE_KEYS
+    STORAGE_KEYS, migrateSelectedArtists
 } from '../utils/localStorage';
+import SelectionTabs from "./selectionsTab.tsx";
 
 const ElectricForestLineup: React.FC = () => {
     useRef<HTMLTextAreaElement>(null);
 
     // Load initial state from localStorage or use defaults
-    const [selectedArtists, setSelectedArtists] = useState<Record<string, boolean>>(() =>
-        loadFromLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, {})
-    );
+    const [selectedArtists, setSelectedArtists] = useState<Record<string, string>>(() => {
+        // First, try to migrate any existing data
+        const migratedData = migrateSelectedArtists();
+
+        // If migration returned data, use it
+        if (Object.keys(migratedData).length > 0) {
+            return migratedData;
+        }
+
+        // Otherwise, load from localStorage as normal
+        return loadFromLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, {});
+    });
 
     const [filter, setFilter] = useState<string>(() =>
         loadFromLocalStorage(STORAGE_KEYS.FILTER, "")
+    );
+
+    const [activeTab, setActiveTab] = useState<string>(() =>
+        loadFromLocalStorage(STORAGE_KEYS.ACTIVE_TAB, "all")
     );
 
     const [category, setCategory] = useState<string>(() =>
@@ -40,6 +55,10 @@ const ElectricForestLineup: React.FC = () => {
     useEffect(() => {
         saveToLocalStorage(STORAGE_KEYS.SELECTED_ARTISTS, selectedArtists);
     }, [selectedArtists]);
+
+    useEffect(() => {
+        saveToLocalStorage(STORAGE_KEYS.ACTIVE_TAB, activeTab);
+    }, [activeTab]);
 
     useEffect(() => {
         saveToLocalStorage(STORAGE_KEYS.FILTER, filter);
@@ -108,38 +127,123 @@ const ElectricForestLineup: React.FC = () => {
     // Get unique days for filtering
     const days = ["All", ...Array.from(new Set(allArtists.map(artist => artist.day).filter(day => day !== "")))];
 
-    // Toggle selection of an artist
-    const toggleArtistSelection = (artistName: string): void => {
-        setSelectedArtists(prev => ({
-            ...prev,
-            [artistName]: !prev[artistName]
-        }));
-    };
-
-    // Select/deselect all visible artists
-    const toggleAllArtists = (): void => {
-        const someSelected = sortedArtists.some(artist => selectedArtists[artist.name]);
-        if (someSelected) {
-            setSelectedArtists({});
+    const tabFilteredArtists = sortedArtists.filter(artist => {
+        if (activeTab === "all") {
+            return true; // Show all artists
+        } else if (activeTab === "none") {
+            // Show artists that are not selected or have empty string value
+            return !selectedArtists[artist.name] || selectedArtists[artist.name] === "";
         } else {
-            const newSelected: Record<string, boolean> = {};
-            sortedArtists.forEach(artist => {
-                newSelected[artist.name] = true;
-            });
-            setSelectedArtists(newSelected);
+            // Show artists with specific selection status
+            return selectedArtists[artist.name] === activeTab;
         }
-    };
-
-    // Count selected artists
-    const selectedCount = Object.values(selectedArtists).filter(Boolean).length;
+    });
 
     // Function to reset all filters and selections
     const resetAll = () => {
         setFilter("");
         setCategory("All");
         setDay("All");
-        setSortBy("category");
+        setSortBy("category"); // Default sort is by category
         setSortDirection("asc");
+    };
+
+    // Helper functions for dropdown styling to match tabs
+    const getTabColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return '#00FFFF';
+            case 'forest-whisper':
+                return '#00FF80';
+            case 'passing-breeze':
+                return '#8A2BE2';
+            case 'none':
+                return '#cccccc';
+            default:
+                return 'white';
+        }
+    };
+
+    const getTabBgColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 30, 60, 0.5))`;
+            case 'forest-whisper':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 40, 20, 0.5))`;
+            case 'passing-breeze':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 0, 50, 0.5))`;
+            case 'none':
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 30, 30, 0.5))`;
+            default:
+                return `linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(30, 30, 30, 0.5))`;
+        }
+    };
+
+    const getTabBorderColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return 'rgba(0, 255, 255, 0.3)';
+            case 'forest-whisper':
+                return 'rgba(0, 255, 128, 0.3)';
+            case 'passing-breeze':
+                return 'rgba(138, 43, 226, 0.3)';
+            case 'none':
+                return 'rgba(204, 204, 204, 0.3)';
+            default:
+                return 'rgba(255, 255, 255, 0.3)';
+        }
+    };
+
+    const getTabShadowColor = (tabId: string): string => {
+        switch (tabId) {
+            case 'electric-magic':
+                return 'rgba(0, 255, 255, 0.2)';
+            case 'forest-whisper':
+                return 'rgba(0, 255, 128, 0.2)';
+            case 'passing-breeze':
+                return 'rgba(138, 43, 226, 0.2)';
+            case 'none':
+                return 'rgba(204, 204, 204, 0.2)';
+            default:
+                return 'rgba(255, 255, 255, 0.2)';
+        }
+    };
+
+    // Function to get background color for category badges
+    const getCategoryColor = (category: string) => {
+        switch (category) {
+            case 'Headliner':
+                return {
+                    bg: 'rgba(128, 0, 128, 0.7)',
+                    shadow: '0 0 8px rgba(128, 0, 128, 0.5)'
+                };
+            case 'Featured Artists':
+                return {
+                    bg: 'rgba(147, 112, 219, 0.7)',
+                    shadow: '0 0 6px rgba(147, 112, 219, 0.5)'
+                };
+            default: // Supporting Artists
+                return {
+                    bg: 'rgba(186, 85, 211, 0.6)',
+                    shadow: '0 0 5px rgba(186, 85, 211, 0.4)'
+                };
+        }
+    };
+
+    // Function to get text color and style for artist name based on category
+    const getArtistNameStyle = (category: string) => {
+        if (category === 'Headliner') {
+            return {
+                color: '#00FFFF',
+                fontWeight: 'bold',
+                textShadow: '0 0 5px rgba(0, 255, 255, 0.6)'
+            };
+        }
+        return {
+            color: 'white',
+            fontWeight: 'normal',
+            textShadow: 'none'
+        };
     };
 
     return (
@@ -147,13 +251,15 @@ const ElectricForestLineup: React.FC = () => {
              style={{
                  backgroundColor: '#071507',
                  backgroundImage: `
-             radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
-             radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
-             radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%)
-           `,
+         radial-gradient(circle at 20% 30%, rgba(0, 255, 170, 0.05) 0%, transparent 40%),
+         radial-gradient(circle at 80% 60%, rgba(128, 0, 255, 0.05) 0%, transparent 40%),
+         radial-gradient(circle at 60% 10%, rgba(0, 128, 255, 0.05) 0%, transparent 30%)
+       `,
                  color: 'white',
                  position: 'relative',
-                 minWidth: '570px'
+                 width: '100%', // Use full width
+                 maxWidth: '100vw', // Never exceed viewport width
+                 overflowX: 'hidden' // Prevent horizontal scrolling
              }}>
 
             {/* Firefly effect elements */}
@@ -177,275 +283,338 @@ const ElectricForestLineup: React.FC = () => {
             ))}
 
             {/* Main content */}
-            <div style={{zIndex: 2, minWidth: '570px',maxWidth: '100%'}}>
+            <div style={{
+                zIndex: 2,
+                width: '100%', // Use full width
+                maxWidth: '1400px', // Cap maximum width for very large screens
+            }}>
                 {/* Header */}
-                <div style={{textAlign: 'center', marginBottom: '20px'}}>
-                    <h1 style={{
-                        color: '#00FF80',
-                        fontSize: '2.5rem',
-                        fontWeight: 'bold',
-                        textShadow: '0 0 10px rgba(0, 255, 128, 0.7), 0 0 20px rgba(0, 255, 128, 0.4)'
-                    }}>
+                <div style={{textAlign: 'center', marginBottom: '20px', position: 'relative'}}>
+                    <h1 
+                        style={{
+                            color: '#00FF80',
+                            fontSize: '2.5rem',
+                            fontWeight: 'bold',
+                            textShadow: '0 0 10px rgba(0, 255, 128, 0.7), 0 0 20px rgba(0, 255, 128, 0.4)',
+                            position: 'relative',
+                            display: 'inline-block',
+                            cursor: 'help'
+                        }}
+                        onMouseEnter={(e) => {
+                            const tooltip = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (tooltip) tooltip.style.opacity = '1';
+                        }}
+                        onMouseLeave={(e) => {
+                            const tooltip = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (tooltip) tooltip.style.opacity = '0';
+                        }}
+                    >
                         ELECTRIC FOREST
                     </h1>
-                    <p style={{color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'}}>
-                        JUNE 19-22, 2025 • ROTHBURY, MI
-                    </p>
-                    <p style={{
+                    <div style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 5px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
                         color: '#00FF80',
-                        marginTop: '10px',
-                        fontSize: '1.2rem',
-                        textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        boxShadow: '0 0 10px rgba(0, 255, 128, 0.3)',
+                        zIndex: 100,
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        pointerEvents: 'none',
+                        textShadow: '0 0 5px rgba(0, 255, 128, 0.5)',
+                        fontSize: '1rem',
+                        whiteSpace: 'nowrap',
+                        display: 'block',
+                        width: 'auto'
                     }}>
+                        JUNE 19-22, 2025 • ROTHBURY, MI
+                    </div>
+                    <p style={{color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'}}>
                         LINEUP EXPLORER
                     </p>
                 </div>
 
-                {/* Controls section - Laid out exactly as in screenshot */}
-                <div style={{marginBottom: '20px'}}>
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Search Artists</div>
+                {/* Layout container for integrated search and filter */}
+                <div style={{margin: '10px auto', width: '95%', maxWidth: '1200px'}}>
+                    {/* Combined Search Bar with Filter Button */}
+                    <div style={{
+                        position: 'relative',
+                        marginBottom: '15px',
+                        width: '100%',
+                    }}>
+                        <div style={{
+                            position: 'absolute',
+                            left: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: 'rgba(0, 255, 128, 0.6)',
+                            zIndex: 1,
+                            pointerEvents: 'none',
+                            textShadow: '0 0 3px rgba(0, 255, 128, 0.3)',
+                        }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" 
+                                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
                         <input
                             type="text"
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
-                            placeholder="Type artist name..."
+                            placeholder="Search artists..."
                             style={{
-                                width: '93.5vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                                width: '100%',
+                                padding: '10px 45px 10px 35px', // Add padding for icon and filter button
+                                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                backgroundImage: 'linear-gradient(135deg, rgba(0, 0, 0, 0.6), rgba(0, 40, 20, 0.5))',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
                                 appearance: 'none',
-                                minWidth: '570px',
+                                borderRadius: '6px 18px 6px 18px',
+                                clipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                WebkitClipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                boxSizing: 'border-box',
+                                fontSize: '0.95rem',
+                                textShadow: '0 0 3px rgba(0, 255, 128, 0.2)',
                             }}
                         />
-                    </div>
-
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Filter by Day</div>
-                        <select
-                            value={day}
-                            onChange={(e) => setDay(e.target.value)}
-                            style={{
-                                width: '95vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                border: '1px solid rgba(0, 255, 128, 0.3)',
-                                color: 'white',
-                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none',
-                                minWidth: '570px',
-                            }}
-                        >
-                            {days.map(d => (
-                                <option key={d} value={d}>{d}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Filter by Category</div>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            style={{
-                                width: '95vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                border: '1px solid rgba(0, 255, 128, 0.3)',
-                                color: 'white',
-                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none',
-                                minWidth: '570px'
-                            }}
-                        >
-                            <option value="All">All</option>
-                            <option value="Headliner">Headliner</option>
-                            <option value="Featured Artists">Featured Artists</option>
-                            <option value="Supporting Artists">Supporting Artists</option>
-                        </select>
-                    </div>
-
-                    {/* Reset button */}
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <button
-                            onClick={resetAll}
-                            style={{
-                                width: '95vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(138, 43, 226, 0.5)',
-                                border: '1px solid rgba(138, 43, 226, 0.8)',
-                                color: 'white',
-                                cursor: 'pointer',
-                                borderRadius: '4px',
-                                boxShadow: '0 0 5px rgba(138, 43, 226, 0.3)',
-                                transition: 'all 0.2s ease',
-                                minWidth: '570px',
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.7)'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.5)'}
-                        >
-                            Reset All Filters
-                        </button>
+                        {/* Filter Button positioned inside search input */}
+                        <div style={{
+                            position: 'absolute',
+                            right: '20px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            zIndex: 1,
+                        }}>
+                            <FilterSortPanel
+                                day={day}
+                                setDay={setDay}
+                                category={category}
+                                setCategory={setCategory}
+                                sortBy={sortBy}
+                                sortDirection={sortDirection}
+                                handleSort={handleSort}
+                                resetAll={resetAll}
+                                days={days}
+                            />
+                        </div>
                     </div>
                 </div>
 
-                <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists}/>
+                <SelectionTabs
+                    activeTab={activeTab}
+                    setActiveTab={setActiveTab}
+                    selectedArtists={selectedArtists}
+                    filteredArtists={sortedArtists}
+                />
 
-                {/* Artists section - Matching the screenshot layout */}
-                <div style={{minWidth: '570px', width: '95vw', margin: '10px 2.5vw 20px 2.5vw'}}>
-                    <div style={{
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        marginBottom: '10px'
-                    }}>
-                        <div>Artists ({filteredArtists.length})</div>
-                        <div>Selected: {selectedCount}</div>
-                    </div>
+                {/* Artist Cards Container */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fill, minmax(350px, 1fr))',
+                    gap: '20px',
+                    paddingBottom: '20px',
+                    width: '90vw',
+                    margin: '10px 2.5vw 10px 2.5vw'
+                }}>
+                    {tabFilteredArtists.map((artist) => {
+                        const categoryStyle = getCategoryColor(artist.category);
+                        const nameStyle = getArtistNameStyle(artist.category);
 
-                    <div style={{
-                        border: '1px solid rgba(0, 255, 128, 0.3)',
-                        backgroundColor: 'rgba(0, 0, 0, 0.4)',
-                        boxShadow: '0 0 10px rgba(0, 255, 128, 0.15)'
-                    }}>
-                        <table style={{width: '100%', borderCollapse: 'collapse'}}>
-                            <thead>
-                            <tr style={{borderBottom: '1px solid rgba(0, 255, 128, 0.3)'}}>
-                                <th style={{
-                                    padding: '10px',
-                                    textAlign: 'left',
-                                    width: '40px'
+                        return (
+                            <div key={artist.name} style={{
+                                backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                                borderRadius: '8px',
+                                padding: '16px',
+                                boxShadow: '0 0 10px rgba(0, 255, 128, 0.15)',
+                                border: '1px solid rgba(0, 255, 128, 0.2)',
+                                position: 'relative',
+                                overflow: 'hidden',
+                                minHeight: '160px',
+                                boxSizing: 'border-box' // Ensure padding is included in width calculation
+                            }}>
+                                {/* Top row with name and checkbox */}
+                                <div style={{
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'flex-start',
+                                    marginBottom: '14px'
                                 }}>
-                                    <input
-                                        type="checkbox"
-                                        onChange={toggleAllArtists}
-                                        checked={sortedArtists.length > 0 && sortedArtists.every(artist => selectedArtists[artist.name])}
-                                    />
-                                </th>
-                                <th
-                                    onClick={() => handleSort("name")}
-                                    style={{
-                                        padding: '10px',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#00FF80',
-                                        textShadow: '0 0 5px rgba(0, 255, 128, 0.4)'
-                                    }}
-                                >
-                                    ARTIST
-                                    {sortBy === "name" && (
-                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
-                                    )}
-                                </th>
-                                <th
-                                    onClick={() => handleSort("category")}
-                                    style={{
-                                        padding: '10px',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#8A2BE2',
-                                        textShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
-                                    }}
-                                >
-                                    CATEGORY
-                                    {sortBy === "category" && (
-                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
-                                    )}
-                                </th>
-                                <th
-                                    onClick={() => handleSort("day")}
-                                    style={{
-                                        padding: '10px',
-                                        textAlign: 'left',
-                                        cursor: 'pointer',
-                                        color: '#00BFFF',
-                                        textShadow: '0 0 5px rgba(0, 191, 255, 0.4)'
-                                    }}
-                                >
-                                    DAY
-                                    {sortBy === "day" && (
-                                        <span>{sortDirection === "asc" ? " ↑" : " ↓"}</span>
-                                    )}
-                                </th>
-                                <th style={{
-                                    padding: '10px',
-                                    textAlign: 'left',
-                                    color: '#FFFF00',
-                                    textShadow: '0 0 5px rgba(255, 255, 0, 0.4)'
-                                }}>
-                                    LISTEN
-                                </th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {sortedArtists.map((artist, idx) => (
-                                <tr key={artist.name}
-                                    style={{
-                                        backgroundColor: idx % 2 === 0 ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.5)',
-                                        borderBottom: '1px solid rgba(0, 255, 128, 0.1)'
-                                    }}>
-                                    <td style={{padding: '10px'}}>
-                                        <input
-                                            type="checkbox"
-                                            checked={!!selectedArtists[artist.name]}
-                                            onChange={() => toggleArtistSelection(artist.name)}
-                                        />
-                                    </td>
-                                    <td style={{
-                                        padding: '10px',
-                                        color: artist.category === 'Headliner' ? '#00FFFF' : 'white',
-                                        fontWeight: artist.category === 'Headliner' ? 'bold' : 'normal',
-                                        textShadow: artist.category === 'Headliner' ? '0 0 5px rgba(0, 255, 255, 0.6)' : 'none'
+                                    <h3 style={{
+                                        margin: '0',
+                                        fontSize: '1.2rem',
+                                        maxWidth: 'calc(100% - 30px)',
+                                        overflow: 'hidden',
+                                        textOverflow: 'ellipsis',
+                                        ...nameStyle
                                     }}>
                                         {artist.name}
-                                    </td>
-                                    <td style={{padding: '10px'}}>
+                                    </h3>
+
+                                    {/* Custom dropdown */}
+                                    <div
+                                        style={{
+                                            position: 'relative',
+                                            flexShrink: 0,
+                                            marginLeft: '10px',
+                                            width: '150px',
+                                        }}
+                                    >
+                                        <select
+                                            value={selectedArtists[artist.name] || "none"}
+                                            onChange={(e) => {
+                                                const newValue = e.target.value;
+                                                setSelectedArtists(prev => ({
+                                                    ...prev,
+                                                    [artist.name]: newValue === "none" ? "" : newValue
+                                                }));
+                                            }}
+                                            style={{
+                                                width: '100%',
+                                                padding: '6px 30px 6px 12px',
+                                                backgroundColor: getTabBgColor(selectedArtists[artist.name] || 'none'),
+                                                border: `1px solid ${getTabBorderColor(selectedArtists[artist.name] || 'none')}`,
+                                                color: getTabColor(selectedArtists[artist.name] || 'none'),
+                                                cursor: 'pointer',
+                                                boxShadow: `0 0 5px ${getTabShadowColor(selectedArtists[artist.name] || 'none')}`,
+                                                WebkitAppearance: 'none',
+                                                MozAppearance: 'none',
+                                                appearance: 'none',
+                                                borderRadius: '6px 18px 6px 18px',
+                                                textShadow: `0 0 3px ${getTabShadowColor(selectedArtists[artist.name] || 'none')}`,
+                                                clipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                                WebkitClipPath: 'polygon(0% 15%, 3% 3%, 15% 0%, 85% 0%, 97% 3%, 100% 15%, 100% 85%, 97% 97%, 85% 100%, 15% 100%, 3% 97%, 0% 85%)',
+                                                fontSize: '0.85rem',
+                                            }}
+                                        >
+                                            <option value="none">🦉 Hidden Grove</option>
+                                            <option value="electric-magic">⚡ Electric Magic</option>
+                                            <option value="forest-whisper">🌳 Forest Whisper</option>
+                                            <option value="passing-breeze">🍂 Passing Breeze</option>
+                                        </select>
+                                        <div style={{
+                                            position: 'absolute',
+                                            right: '10px',
+                                            top: '50%',
+                                            transform: 'translateY(-50%)',
+                                            pointerEvents: 'none',
+                                            fontSize: '0.85rem',
+                                            color: getTabColor(selectedArtists[artist.name] || 'none'),
+                                            textShadow: `0 0 3px ${getTabShadowColor(selectedArtists[artist.name] || 'none')}`,
+                                        }}>
+                                            <span>↓</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Bottom content row */}
+                                <div style={{
+                                    display: 'flex',
+                                    width: '100%',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    gap: '16px' // Space between columns
+                                }}>
+                                    {/* Left column - Category and day info */}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '10px',
+                                        flex: '1 1 auto',
+                                        minWidth: '0',
+                                        maxWidth: '60%'
+                                    }}>
+                                        {/* Category badge */}
                                         <span style={{
                                             display: 'inline-block',
                                             padding: '5px 15px',
                                             borderRadius: '20px',
                                             fontSize: '0.85rem',
                                             textAlign: 'center',
-                                            backgroundColor: artist.category === 'Headliner'
-                                                ? 'rgba(128, 0, 128, 0.7)' // Darker purple for Headliner
-                                                : artist.category === 'Featured Artists'
-                                                    ? 'rgba(147, 112, 219, 0.7)' // Medium purple for Featured Artists
-                                                    : 'rgba(186, 85, 211, 0.6)', // Lighter purple for Supporting Artists
+                                            backgroundColor: categoryStyle.bg,
                                             color: 'white',
-                                            boxShadow: artist.category === 'Headliner'
-                                                ? '0 0 8px rgba(128, 0, 128, 0.5)'
-                                                : artist.category === 'Featured Artists'
-                                                    ? '0 0 6px rgba(147, 112, 219, 0.5)'
-                                                    : '0 0 5px rgba(186, 85, 211, 0.4)'
+                                            boxShadow: categoryStyle.shadow,
+                                            alignSelf: 'flex-start',
+                                            maxWidth: '100%',
+                                            overflow: 'hidden',
+                                            textOverflow: 'ellipsis',
+                                            whiteSpace: 'nowrap'
                                         }}>
-                                            {artist.category}
-                                        </span>
-                                    </td>
-                                    <td style={{padding: '10px'}}>
-                                        {artist.day || "TBA"}
-                                    </td>
-                                    <td style={{padding: '10px'}}>
+                            {artist.category}
+                        </span>
+
+                                        {/* Day information */}
+                                        {artist.day && (
+                                            <div style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                                gap: '5px'
+                                            }}>
+                                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M8 2V6M16 2V6M3 10H21M5 4H19C20.1046 4 21 4.89543 21 6V20C21 21.1046 20.1046 22 19 22H5C3.89543 22 3 21.1046 3 20V6C3 4.89543 3.89543 4 5 4Z"
+                                                          stroke="#00BFFF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                                </svg>
+                                                <span style={{color: '#00BFFF'}}>{artist.day || "TBA"}</span>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* Right column - Music service buttons */}
+                                    <div style={{
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        gap: '10px',
+                                        width: '100px', // Fixed width
+                                        flexShrink: 0, // Don't shrink
+                                        boxSizing: 'border-box'
+                                    }}>
                                         <MusicServiceButtons
                                             spotifyId={artist.spotifyId}
                                             youtubeId={artist.youtubeId}
                                         />
-                                    </td>
-                                </tr>
-                            ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                    </div>
+                                </div>
+
+                                {/* Hover glow effect */}
+                                <div style={{
+                                    position: 'absolute',
+                                    top: 0,
+                                    left: 0,
+                                    right: 0,
+                                    bottom: 0,
+                                    pointerEvents: 'none',
+                                    borderRadius: '8px',
+                                    transition: 'box-shadow 0.3s ease',
+                                    boxShadow: 'inset 0 0 0 rgba(0, 255, 128, 0)'
+                                }} className="card-glow"></div>
+                            </div>
+                        );
+                    })}
                 </div>
             </div>
 
-            {/* Animations */}
+            <ExportSelectedArtists selectedArtists={selectedArtists} allArtists={allArtists}/>
+            {/* Animations and styles */}
             <style>{`
                 @keyframes firefly {
                     0% { opacity: 0; }
                     50% { opacity: 0.8; }
                     100% { opacity: 0; }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+                
+                /* Card hover effect */
+                div:hover > .card-glow {
+                    box-shadow: inset 0 0 20px rgba(0, 255, 128, 0.3) !important;
                 }
             `}</style>
         </div>

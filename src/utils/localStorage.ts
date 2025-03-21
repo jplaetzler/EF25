@@ -9,7 +9,8 @@ export const STORAGE_KEYS = {
     CATEGORY: 'ef_category',
     DAY: 'ef_day',
     SORT_BY: 'ef_sort_by',
-    SORT_DIRECTION: 'ef_sort_direction'
+    SORT_DIRECTION: 'ef_sort_direction',
+    ACTIVE_TAB: 'ef_active_tab' // Add this new key
 };
 
 /**
@@ -45,27 +46,47 @@ export const loadFromLocalStorage = <T>(key: string, defaultValue: T): T => {
     }
 };
 
-/**
- * Remove an item from localStorage
- * @param key The key to remove
- */
-export const removeFromLocalStorage = (key: string): void => {
-    try {
-        localStorage.removeItem(key);
-    } catch (error) {
-        console.error(`Error removing from localStorage: ${error}`);
-    }
-};
 
 /**
- * Clear all app localStorage items
+ * Migrates the selected artists from boolean values to string values
+ * @returns A migrated record object with string values
  */
-export const clearAllAppData = (): void => {
+export const migrateSelectedArtists = (): Record<string, string> => {
     try {
-        Object.values(STORAGE_KEYS).forEach(key => {
-            localStorage.removeItem(key);
-        });
+        const serializedData = localStorage.getItem(STORAGE_KEYS.SELECTED_ARTISTS);
+        if (serializedData === null) {
+            return {};
+        }
+
+        const parsedData = JSON.parse(serializedData);
+        const migratedData: Record<string, string> = {};
+
+        // Check if we need to migrate (if any value is boolean)
+        const needsMigration = Object.values(parsedData).some(value => typeof value === 'boolean');
+
+        if (needsMigration) {
+            console.log('Migrating selected artists from boolean to string format');
+
+            Object.entries(parsedData).forEach(([artist, value]) => {
+                // If the value is true, set it to "electric-magic"
+                if (value === true) {
+                    migratedData[artist] = 'electric-magic';
+                }
+                // If the value is already a string, keep it as is
+                else if (typeof value === 'string' && value) {
+                    migratedData[artist] = value;
+                }
+                // Otherwise, don't include it (it was false or empty)
+            });
+
+            // Save the migrated data back to localStorage
+            localStorage.setItem(STORAGE_KEYS.SELECTED_ARTISTS, JSON.stringify(migratedData));
+            return migratedData;
+        }
+
+        return parsedData;
     } catch (error) {
-        console.error(`Error clearing app data from localStorage: ${error}`);
+        console.error(`Error migrating selected artists: ${error}`);
+        return {};
     }
 };
