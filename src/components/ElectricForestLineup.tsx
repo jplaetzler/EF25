@@ -2,6 +2,7 @@ import React, {useState, useRef, useEffect} from 'react';
 import {artists as allArtists} from '../data/artists';
 import MusicServiceButtons from './MusicServiceButtons';
 import ExportSelectedArtists from './ExportSelectedArtists';
+import FilterSortPanel from './FilterSortPanel';
 import {
     saveToLocalStorage,
     loadFromLocalStorage,
@@ -143,7 +144,7 @@ const ElectricForestLineup: React.FC = () => {
         setFilter("");
         setCategory("All");
         setDay("All");
-        setSortBy("category");
+        setSortBy("category"); // Default sort is by category
         setSortDirection("asc");
     };
 
@@ -225,172 +226,123 @@ const ElectricForestLineup: React.FC = () => {
                 zIndex: 2,
                 width: '100%', // Use full width
                 maxWidth: '1400px', // Cap maximum width for very large screens
-                margin: '0 auto', // Center content on large screens
-                padding: '0 15px' // Add some padding on the sides
             }}>
                 {/* Header */}
-                <div style={{textAlign: 'center', marginBottom: '20px'}}>
-                    <h1 style={{
-                        color: '#00FF80',
-                        fontSize: '2.5rem',
-                        fontWeight: 'bold',
-                        textShadow: '0 0 10px rgba(0, 255, 128, 0.7), 0 0 20px rgba(0, 255, 128, 0.4)'
-                    }}>
+                <div style={{textAlign: 'center', marginBottom: '20px', position: 'relative'}}>
+                    <h1 
+                        style={{
+                            color: '#00FF80',
+                            fontSize: '2.5rem',
+                            fontWeight: 'bold',
+                            textShadow: '0 0 10px rgba(0, 255, 128, 0.7), 0 0 20px rgba(0, 255, 128, 0.4)',
+                            position: 'relative',
+                            display: 'inline-block',
+                            cursor: 'help'
+                        }}
+                        onMouseEnter={(e) => {
+                            const tooltip = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (tooltip) tooltip.style.opacity = '1';
+                        }}
+                        onMouseLeave={(e) => {
+                            const tooltip = e.currentTarget.nextElementSibling as HTMLElement;
+                            if (tooltip) tooltip.style.opacity = '0';
+                        }}
+                    >
                         ELECTRIC FOREST
                     </h1>
-                    <p style={{color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'}}>
-                        JUNE 19-22, 2025 • ROTHBURY, MI
-                    </p>
-                    <p style={{
+                    <div style={{
+                        position: 'absolute',
+                        top: 'calc(100% + 5px)',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
                         color: '#00FF80',
-                        marginTop: '10px',
-                        fontSize: '1.2rem',
-                        textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'
+                        padding: '8px 15px',
+                        borderRadius: '5px',
+                        boxShadow: '0 0 10px rgba(0, 255, 128, 0.3)',
+                        zIndex: 100,
+                        opacity: 0,
+                        transition: 'opacity 0.3s ease',
+                        pointerEvents: 'none',
+                        textShadow: '0 0 5px rgba(0, 255, 128, 0.5)',
+                        fontSize: '1rem',
+                        whiteSpace: 'nowrap',
+                        display: 'block',
+                        width: 'auto'
                     }}>
+                        JUNE 19-22, 2025 • ROTHBURY, MI
+                    </div>
+                    <p style={{color: '#00FF80', marginTop: '5px', textShadow: '0 0 5px rgba(0, 255, 128, 0.5)'}}>
                         LINEUP EXPLORER
                     </p>
                 </div>
 
-                {/* Controls section */}
-                <div style={{marginBottom: '20px'}}>
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Search Artists</div>
+                {/* Layout container for integrated search and filter */}
+                <div style={{margin: '10px 2.5vw'}}>
+                    {/* Combined Search Bar with Filter Button */}
+                    <div style={{
+                        position: 'relative',
+                        marginBottom: '15px',
+                        width: '95%',
+                        maxWidth: '1200px',
+                        margin: '0 auto',
+                    }}>
+                        <div style={{
+                            position: 'absolute',
+                            left: '10px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            color: 'rgba(255, 255, 255, 0.6)',
+                            zIndex: 1,
+                            pointerEvents: 'none',
+                        }}>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M21 21L15 15M17 10C17 13.866 13.866 17 10 17C6.13401 17 3 13.866 3 10C3 6.13401 6.13401 3 10 3C13.866 3 17 6.13401 17 10Z" 
+                                      stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                            </svg>
+                        </div>
                         <input
                             type="text"
                             value={filter}
                             onChange={(e) => setFilter(e.target.value)}
-                            placeholder="Type artist name..."
+                            placeholder="Search artists..."
                             style={{
-                                width: '87.5vw', // Full width
-                                padding: '10px',
+                                width: '100%',
+                                padding: '10px 45px 10px 35px', // Add padding for icon and filter button
                                 backgroundColor: 'rgba(0, 0, 0, 0.5)',
                                 border: '1px solid rgba(0, 255, 128, 0.3)',
                                 color: 'white',
                                 boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
                                 appearance: 'none',
+                                borderRadius: '4px',
+                                boxSizing: 'border-box',
+                                fontSize: '0.95rem',
                             }}
                         />
-                    </div>
-
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Filter by Day</div>
-                        <select
-                            value={day}
-                            onChange={(e) => setDay(e.target.value)}
-                            style={{
-                                width: '90vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                border: '1px solid rgba(0, 255, 128, 0.3)',
-                                color: 'white',
-                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none',
-                            }}
-                        >
-                            {days.map(d => (
-                                <option key={d} value={d}>{d}</option>
-                            ))}
-                        </select>
-                    </div>
-
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Filter by Category</div>
-                        <select
-                            value={category}
-                            onChange={(e) => setCategory(e.target.value)}
-                            style={{
-                                width: '90vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                                border: '1px solid rgba(0, 255, 128, 0.3)',
-                                color: 'white',
-                                boxShadow: '0 0 5px rgba(0, 255, 128, 0.2)',
-                                appearance: 'none',
-                            }}
-                        >
-                            <option value="All">All</option>
-                            <option value="Headliner">Headliner</option>
-                            <option value="Featured Artists">Featured Artists</option>
-                            <option value="Supporting Artists">Supporting Artists</option>
-                        </select>
-                    </div>
-
-                    {/* Sort controls */}
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <div>Sort by</div>
+                        {/* Filter Button positioned inside search input */}
                         <div style={{
-                            display: 'flex',
-                            gap: '10px',
-                            width: '90vw'
+                            position: 'absolute',
+                            right: '7px',
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            zIndex: 1,
                         }}>
-                            <button
-                                onClick={() => handleSort("name")}
-                                style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    backgroundColor: sortBy === "name" ? 'rgba(0, 255, 128, 0.3)' : 'rgba(0, 0, 0, 0.5)',
-                                    border: '1px solid rgba(0, 255, 128, 0.3)',
-                                    color: '#00FF80',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    textShadow: '0 0 5px rgba(0, 255, 128, 0.4)'
-                                }}
-                            >
-                                ARTIST {sortBy === "name" && (sortDirection === "asc" ? "↑" : "↓")}
-                            </button>
-                            <button
-                                onClick={() => handleSort("category")}
-                                style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    backgroundColor: sortBy === "category" ? 'rgba(138, 43, 226, 0.3)' : 'rgba(0, 0, 0, 0.5)',
-                                    border: '1px solid rgba(138, 43, 226, 0.3)',
-                                    color: '#8A2BE2',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    textShadow: '0 0 5px rgba(138, 43, 226, 0.4)'
-                                }}
-                            >
-                                CATEGORY {sortBy === "category" && (sortDirection === "asc" ? "↑" : "↓")}
-                            </button>
-                            <button
-                                onClick={() => handleSort("day")}
-                                style={{
-                                    flex: 1,
-                                    padding: '8px',
-                                    backgroundColor: sortBy === "day" ? 'rgba(0, 191, 255, 0.3)' : 'rgba(0, 0, 0, 0.5)',
-                                    border: '1px solid rgba(0, 191, 255, 0.3)',
-                                    color: '#00BFFF',
-                                    cursor: 'pointer',
-                                    borderRadius: '4px',
-                                    textShadow: '0 0 5px rgba(0, 191, 255, 0.4)'
-                                }}
-                            >
-                                DAY {sortBy === "day" && (sortDirection === "asc" ? "↑" : "↓")}
-                            </button>
+                            <FilterSortPanel
+                                filter={filter}
+                                setFilter={setFilter}
+                                day={day}
+                                setDay={setDay}
+                                category={category}
+                                setCategory={setCategory}
+                                sortBy={sortBy}
+                                setSortBy={setSortBy}
+                                sortDirection={sortDirection}
+                                setSortDirection={setSortDirection}
+                                handleSort={handleSort}
+                                resetAll={resetAll}
+                                days={days}
+                            />
                         </div>
-                    </div>
-
-                    {/* Reset button */}
-                    <div style={{margin: '10px 2.5vw 10px 2.5vw'}}>
-                        <button
-                            onClick={resetAll}
-                            style={{
-                                width: '90vw',
-                                padding: '10px',
-                                backgroundColor: 'rgba(138, 43, 226, 0.5)',
-                                border: '1px solid rgba(138, 43, 226, 0.8)',
-                                color: 'white',
-                                cursor: 'pointer',
-                                borderRadius: '4px',
-                                boxShadow: '0 0 5px rgba(138, 43, 226, 0.3)',
-                                transition: 'all 0.2s ease'
-                            }}
-                            onMouseOver={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.7)'}
-                            onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'rgba(138, 43, 226, 0.5)'}
-                        >
-                            Reset All Filters
-                        </button>
                     </div>
                 </div>
 
@@ -474,7 +426,7 @@ const ElectricForestLineup: React.FC = () => {
                                             paddingRight: '1.5rem'
                                         }}
                                     >
-                                        <option value="none" style={{color: '#cccccc'}}>Hidden Grove</option>
+                                        <option value="none" style={{color: '#cccccc'}}>Hidden Grove?</option>
                                         <option value="electric-magic" style={{color: '#00FFFF'}}>Electric Magic</option>
                                         <option value="forest-whisper" style={{color: '#00FF80'}}>Forest Whisper</option>
                                         <option value="passing-breeze" style={{color: '#8A2BE2'}}>Passing Breeze</option>
@@ -574,6 +526,11 @@ const ElectricForestLineup: React.FC = () => {
                     0% { opacity: 0; }
                     50% { opacity: 0.8; }
                     100% { opacity: 0; }
+                }
+                
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(-10px); }
+                    to { opacity: 1; transform: translateY(0); }
                 }
                 
                 /* Card hover effect */

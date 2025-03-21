@@ -85,7 +85,7 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
         const csvHeader = ['Name', 'Category', 'Day', 'Selection', 'Spotify ID', 'YouTube ID'].join(',');
         const csvRows = artistsData.map(artist => {
             // Get selection category label
-            let selectionLabel = "Hidden Grove";
+            let selectionLabel = "Hidden Grove?";
             switch (selectedArtists[artist.name]) {
                 case "electric-magic":
                     selectionLabel = "Electric Magic";
@@ -191,7 +191,7 @@ const ExportSelectedArtists: React.FC<ExportSelectedArtistsProps> = ({
                         All Artists ({counts.all})
                     </option>
                     <option value="none" style={{color: '#cccccc'}}>
-                        Hidden Grove ({counts.hidden})
+                        Hidden Grove? ({counts.hidden})
                     </option>
                     <option value="electric-magic" style={{color: '#00FFFF'}}>
                         Electric Magic ({counts.electricMagic})

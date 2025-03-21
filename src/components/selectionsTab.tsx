@@ -16,7 +16,7 @@ const SelectionTabs: React.FC<SelectionTabsProps> = ({
                                                      }) => {
     const tabs = [
         {id: "all", label: "All"},
-        {id: "none", label: "Hidden Grove"},
+        {id: "none", label: "Hidden Grove?"},
         {id: "electric-magic", label: "Electric Magic"},
         {id: "forest-whisper", label: "Forest Whisper"},
         {id: "passing-breeze", label: "Passing Breeze"}
@@ -87,7 +87,7 @@ const SelectionTabs: React.FC<SelectionTabsProps> = ({
                         key={tab.id}
                         onClick={() => setActiveTab(tab.id)}
                         style={{
-                            padding: '10px 15px',
+                            padding: '10px 0',
                             backgroundColor: bgColor,
                             color: tabColor,
                             border: `1px solid ${borderColor}`,
@@ -97,31 +97,42 @@ const SelectionTabs: React.FC<SelectionTabsProps> = ({
                             textShadow: textShadow,
                             transition: 'all 0.2s ease',
                             flex: '1 1 auto',
-                            minWidth: '120px',
+                            minWidth: '150px',
                             maxWidth: '220px',
                             boxShadow: activeTab === tab.id ? `0 0 10px ${borderColor}` : 'none',
-                            position: 'relative'
-                        }}
-                    >
-                        {tab.label}
-                        <span style={{
-                            position: 'absolute',
-                            top: '-8px',
-                            right: '-8px',
-                            backgroundColor: tabColor,
-                            color: '#000',
-                            borderRadius: '50%',
-                            width: '20px',
-                            height: '20px',
+                            position: 'relative',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '0.7rem',
-                            fontWeight: 'bold',
-                            opacity: 0.8
+                            overflow: 'hidden'
+                        }}
+                    >
+                        <span style={{flex: '1', textAlign: 'center', padding: '0 5px'}}>
+                            {tab.label}
+                        </span>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            height: '100%',
+                            marginRight: '12px',
                         }}>
-              {counts[index]}
-            </span>
+                            <div style={{
+                                width: '1px',
+                                height: '15px',
+                                backgroundColor: borderColor,
+                                margin: '0 8px',
+                                opacity: 0.7
+                            }}></div>
+                            <span style={{
+                                color: tabColor,
+                                fontSize: '0.8rem',
+                                fontWeight: 'bold',
+                                minWidth: '20px',
+                                textAlign: 'center'
+                            }}>
+                                {counts[index]}
+                            </span>
+                        </div>
                     </button>
                 );
             })}
